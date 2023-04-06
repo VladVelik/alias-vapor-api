@@ -19,16 +19,20 @@ final class User: Model, Content {
     var email: String
     @Field(key: "password")
     var password: String
+    @Field(key: "login_status")
+    var login_status: Bool?
     
     final class Public: Content {
         var id: UUID?
         var username: String
         var email: String
+        var login_status: Bool?
         
-        init(id: UUID? = nil, username: String, email: String) {
+        init(id: UUID? = nil, username: String, email: String, login_status: Bool? = false) {
             self.id = id
             self.username = username
             self.email = email
+            self.login_status = login_status
         }
     }
 }
@@ -38,7 +42,8 @@ extension User {
         let pub = User.Public(
             id: self.id,
             username: self.username,
-            email: self.email
+            email: self.email,
+            login_status: self.login_status
         )
         return pub
     }

@@ -11,61 +11,91 @@ import Vapor
 struct ParticipantsController: RouteCollection {
     func boot(routes: Vapor.RoutesBuilder) throws {
         let participantGroup = routes.grouped("participants")
-        participantGroup.get(use: getAllHandler)
-        participantGroup.get(":participant_id", use: getHandler)
-        
         let basicMW = User.authenticator()
         let guardMW = User.guardMiddleware()
         let protected = participantGroup.grouped(basicMW, guardMW)
-        protected.post(use: createHandler)
-        protected.put(":participant_id", use: updateHandler)
-        protected.delete(":participant_id", use: deleteHandler)
+
+        protected.put("role", use: updateRoleHandler)
+        protected.delete("fromTeam", ":participant_id", use: deleteFromTeamHandler)
+        protected.delete("fromRoom", ":participant_id", use: deleteFromRoomHandler)
     }
     
-    //MARK: GET Request /participants route
-    func getAllHandler(req: Request) async throws -> [Participant] {
-        return try await Participant.query(on: req.db).all()
-    }
-    
-    //MARK: GET Request /participants/id= route
-    func getHandler(req: Request) async throws -> Participant {
-        guard let participant = try await Participant.find(req.parameters.get("participant_id"), on: req.db) else {
+    // MARK: - CHANGE ROLE (PUT Request /participants/role route)
+    func updateRoleHandler(req: Request) async throws -> Participant {
+        struct Context: Content {
+            var participant_id: UUID
+            var role: String
+        }
+        
+        let context = try req.content.decode(Context.self)
+        
+        let auth_user = try req.auth.require(User.self)
+        
+        guard let participant = try await Participant.query(on: req.db)
+            .filter(\.$userID == auth_user.id!)
+            .filter(\.$role == "admin")
+            .first()
+        else {
             throw Abort(.notFound)
         }
-        return participant
-    }
-    
-    //MARK: POST Request /participants route
-    func createHandler(req: Request) async throws -> Participant {
-        guard let participant = try? req.content.decode(Participant.self) else {
-            throw Abort(.custom(code: 499, reasonPhrase: "Decode Failed"))
+        
+        guard let participant = try await Participant.query(on: req.db)
+            .filter(\.$id == context.participant_id)
+            .first()
+        else {
+            throw Abort(.notFound)
         }
-        try await participant.save(on: req.db)
+        
+        if participant.userID != auth_user.id {
+            participant.role = context.role
+            try await participant.save(on: req.db)
+        }
         return participant
     }
     
-    //MARK: PUT Request /participants/id= route
-    func updateHandler(req: Request) async throws -> Participant {
+    //MARK: DELETE PARTICIPANT FROM TEAM (DELETE Request /participants/fromTeam/id route)
+    func deleteFromTeamHandler(req: Request) async throws -> HTTPStatus {
         guard let participant = try await Participant.find(req.parameters.get("participant_id"), on: req.db) else {
             throw Abort(.notFound)
         }
         
-        let updatedParticipant = try req.content.decode(Participant.self)
+        let auth_user = try req.auth.require(User.self)
         
-        participant.userID = updatedParticipant.userID
-        participant.roomID = updatedParticipant.roomID
-        participant.teamID = updatedParticipant.teamID
-        participant.role = updatedParticipant.role
-        try await participant.save(on: req.db)
-        return participant
+        guard let participant_admin = try await Participant.query(on: req.db)
+            .filter(\.$userID == auth_user.id!)
+            .filter(\.$role == "admin")
+            .first()
+        else {
+            throw Abort(.notFound)
+        }
+        if participant.userID != auth_user.id {
+            participant.teamID = nil
+            return .ok
+        } else {
+            return .badRequest
+        }
     }
     
-    //MARK: DELETE Request /participants/id= route
-    func deleteHandler(req: Request) async throws -> HTTPStatus {
+    //MARK: DELETE PARTICIPANT FROM ROOM (DELETE Request /participants/fromRoom/id route)
+    func deleteFromRoomHandler(req: Request) async throws -> HTTPStatus {
         guard let participant = try await Participant.find(req.parameters.get("participant_id"), on: req.db) else {
             throw Abort(.notFound)
         }
-        try await participant.delete(on: req.db)
-        return .ok
+        
+        let auth_user = try req.auth.require(User.self)
+        
+        guard let participant_admin = try await Participant.query(on: req.db)
+            .filter(\.$userID == auth_user.id!)
+            .filter(\.$role == "admin")
+            .first()
+        else {
+            throw Abort(.notFound)
+        }
+        if participant.userID != auth_user.id {
+            try await participant.delete(on: req.db)
+            return .ok
+        } else {
+            return .badRequest
+        }
     }
 }
