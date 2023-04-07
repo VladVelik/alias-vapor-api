@@ -1,5 +1,5 @@
 <h1 align="left">Backend for <a href="https://en.wikipedia.org/wiki/Alias_(board_game)" target="_blank">Alias </a>game</h1>
-
+<h3 align="left">All requests except the first one require authorization</h3>
 <h2 align="left">Main functions</h2>
 
 1. User registration - http://127.0.0.1:8080/users/register [POST]
