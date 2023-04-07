@@ -16,14 +16,14 @@ struct ParticipantsController: RouteCollection {
         let protected = participantGroup.grouped(basicMW, guardMW)
 
         protected.put("role", use: updateRoleHandler)
-        protected.delete("fromTeam", ":participant_id", use: deleteFromTeamHandler)
-        protected.delete("fromRoom", ":participant_id", use: deleteFromRoomHandler)
+        protected.delete("fromTeam", ":user_id", use: deleteFromTeamHandler)
+        protected.delete("fromRoom", ":user_id", use: deleteFromRoomHandler)
     }
     
     // MARK: - CHANGE ROLE (PUT Request /participants/role route)
     func updateRoleHandler(req: Request) async throws -> Participant {
         struct Context: Content {
-            var participant_id: UUID
+            var user_id: UUID
             var role: String
         }
         
@@ -40,7 +40,7 @@ struct ParticipantsController: RouteCollection {
         }
         
         guard let participant = try await Participant.query(on: req.db)
-            .filter(\.$id == context.participant_id)
+            .filter(\.$userID == context.user_id)
             .first()
         else {
             throw Abort(.notFound)
@@ -55,7 +55,7 @@ struct ParticipantsController: RouteCollection {
     
     //MARK: DELETE PARTICIPANT FROM TEAM (DELETE Request /participants/fromTeam/id route)
     func deleteFromTeamHandler(req: Request) async throws -> HTTPStatus {
-        guard let participant = try await Participant.find(req.parameters.get("participant_id"), on: req.db) else {
+        guard let user = try await User.find(req.parameters.get("user_id"), on: req.db) else {
             throw Abort(.notFound)
         }
         
@@ -68,8 +68,12 @@ struct ParticipantsController: RouteCollection {
         else {
             throw Abort(.notFound)
         }
-        if participant.userID != auth_user.id {
-            participant.teamID = nil
+        if user.id != auth_user.id {
+            let participant = try await Participant.query(on: req.db)
+                .filter(\.$userID == user.id!)
+                .first()
+            participant!.teamID = nil
+            try await participant!.save(on: req.db)
             return .ok
         } else {
             return .badRequest
@@ -78,7 +82,7 @@ struct ParticipantsController: RouteCollection {
     
     //MARK: DELETE PARTICIPANT FROM ROOM (DELETE Request /participants/fromRoom/id route)
     func deleteFromRoomHandler(req: Request) async throws -> HTTPStatus {
-        guard let participant = try await Participant.find(req.parameters.get("participant_id"), on: req.db) else {
+        guard let user = try await User.find(req.parameters.get("user_id"), on: req.db) else {
             throw Abort(.notFound)
         }
         
@@ -91,8 +95,11 @@ struct ParticipantsController: RouteCollection {
         else {
             throw Abort(.notFound)
         }
-        if participant.userID != auth_user.id {
-            try await participant.delete(on: req.db)
+        if user.id != auth_user.id {
+            let participant = try await Participant.query(on: req.db)
+                .filter(\.$userID == user.id!)
+                .first()
+            try await participant!.delete(on: req.db)
             return .ok
         } else {
             return .badRequest

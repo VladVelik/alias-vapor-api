@@ -103,7 +103,7 @@ struct RoomsController: RouteCollection {
         }
 
         let teams = try await Team.query(on: req.db)
-            .filter(\.$roomID == room.id)
+            .filter(\.$roomID == room.id!)
             .all()
         
         if teams.count < 2 {
@@ -120,7 +120,8 @@ struct RoomsController: RouteCollection {
             }
         }
         
-        // send data to all users
+        // send data to all users in room
+        // send status to all users in room
 
         room.game_status = true
         try await room.save(on: req.db)
@@ -143,6 +144,8 @@ struct RoomsController: RouteCollection {
             throw Abort(.notFound)
         }
         
+        // send status to all users in room
+        
         room.game_status = false
         try await room.save(on: req.db)
         return .ok
@@ -163,6 +166,8 @@ struct RoomsController: RouteCollection {
         else {
             throw Abort(.notFound)
         }
+        
+        // send status to all users in room
         
         room.game_status = true
         try await room.save(on: req.db)

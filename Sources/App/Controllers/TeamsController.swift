@@ -18,8 +18,8 @@ struct TeamsController: RouteCollection {
         protected.put("enter", use: enterTeamHandler)
         protected.post("create", use: createTeamHandler)
         protected.get(":room_id", use: getAllTeamsOfRoomHandler)
-        protected.get("users", ":room_id", use: getUsersOfTeamHandler)
-        protected.put("addPoints", "team_id", use: addPointsHandler)
+        protected.get("users", ":team_id", use: getUsersOfTeamHandler)
+        protected.put("addPoints", ":team_id", use: addPointsHandler)
         protected.delete(":room_id", use: deleteTeamsHandler)
     }
     
@@ -71,23 +71,23 @@ struct TeamsController: RouteCollection {
         }
         
         let teams = try await Team.query(on: req.db)
-            .filter(\.$roomID == room.id)
+            .filter(\.$roomID == room.id!)
             .all()
         return teams
     }
     
     // MARK: - GET USERS OF TEAM (GET Request /teams/users/teamID route)
-    func getUsersOfTeamHandler(req: Request) async throws -> [User] {
+    func getUsersOfTeamHandler(req: Request) async throws -> [User.Public] {
         guard let team = try await Team.find(req.parameters.get("team_id"), on: req.db) else {
             throw Abort(.notFound)
         }
         let participants = try await Participant.query(on: req.db)
             .filter(\.$teamID == team.id)
             .all()
-        var users: [User] = []
+        var users: [User.Public] = []
         for i in participants {
             var user = try await User.query(on: req.db).filter(\.$id == i.userID).first()
-            users.append(user!)
+            users.append((user?.converToPublic())!)
         }
         return users
     }
@@ -125,18 +125,28 @@ struct TeamsController: RouteCollection {
             throw Abort(.notFound)
         }
         
+        var usr_id: [UUID] = []
+        var role: [String] = []
+        
         if room.game_status == false {
             let teams = try await Team.query(on: req.db)
-                .filter(\.$roomID == room.id)
+                .filter(\.$roomID == room.id!)
                 .all()
             let participants = try await Participant.query(on: req.db)
                 .filter(\.$roomID == room.id!)
                 .all()
-            participants.forEach { i in
-                i.teamID = nil
+            for i in participants {
+                usr_id.append(i.userID)
+                role.append(i.role)
             }
+            try await participants.delete(on: req.db)
             try await teams.delete(on: req.db)
+            for i in 0..<usr_id.count {
+                try await Participant(userID: usr_id[i], roomID: room.id!, role: role[i]).save(on: req.db)
+            }
+            return .ok
+        } else {
+            return .badRequest
         }
-        return .ok
     }
 }

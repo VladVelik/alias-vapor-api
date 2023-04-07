@@ -14,7 +14,7 @@ final class Team: Model, Content {
     @ID(key: .id)
     var id: UUID?
     @Field(key: "room_id")
-    var roomID: UUID?
+    var roomID: UUID
     @Field(key: "name")
     var name: String
     @Field(key: "points")
@@ -22,7 +22,7 @@ final class Team: Model, Content {
     
     init() { }
     
-    init(id: UUID? = nil, roomID: UUID? = nil, name: String, points: Int) {
+    init(id: UUID? = nil, roomID: UUID, name: String, points: Int) {
         self.id = id
         self.roomID = roomID
         self.name = name
