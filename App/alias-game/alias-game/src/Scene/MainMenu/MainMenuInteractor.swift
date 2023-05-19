@@ -50,24 +50,22 @@ extension MainMenuInteractor: MainMenuBusinessLogic {
         req.setValue("application/json", forHTTPHeaderField: "Content-Type")
         req.setValue("*/*", forHTTPHeaderField: "Accept")
         req.setValue("Basic \(base64LoginString)", forHTTPHeaderField: "Authorization")
-        req.httpMethod = "GET"
+        req.httpMethod = "PUT"
         let parameters: [String: Any] = [
             "login_status": false
         ]
         let jsonData = try? JSONSerialization.data(withJSONObject: parameters)
         req.httpBody = jsonData
-        let group = DispatchGroup()
-        group.enter()
         let _ = URLSession.shared.dataTask(with: req) { [weak self] (data, response, error) in
             if error != nil {
                 return
             }
             if data != nil {
-                self?.presenter.presentAuth(Model.Auth.Response())
+                DispatchQueue.main.async {
+                    self?.presenter.presentAuth(Model.Auth.Response())
+                }
             }
-            group.leave()
         }.resume()
-        group.wait()
     }
     
     func loadSettings(_ request: Model.Settings.Request) {
@@ -90,23 +88,20 @@ extension MainMenuInteractor: MainMenuBusinessLogic {
         req.setValue("*/*", forHTTPHeaderField: "Accept")
         req.setValue("Basic \(base64LoginString)", forHTTPHeaderField: "Authorization")
         req.httpMethod = "GET"
-        let group = DispatchGroup()
-        group.enter()
         let _ = URLSession.shared.dataTask(with: req) { [weak self] (data, response, error) in
             if error != nil {
                 return
             }
             if let data = data {
                 do {
-                    let object = try JSONDecoder().decode(Model.OpenRoomsList.self, from: data)
-                    self?.presenter.presentOpenRooms(Model.OpenRooms.Response(open_rooms: object))
+                    let object = try JSONDecoder().decode([Model.Room].self, from: data)
+                    self?.presenter.presentOpenRooms(Model.OpenRooms.Response(open_rooms: Model.OpenRoomsList(open_rooms: object)))
+                    print("\(object)")
                 } catch _ {
                     print("fetch data error")
                 }
             }
-            group.leave()
         }.resume()
-        group.wait()
     }
     
     func loadCreateRoomAlert(_ request: Model.CreateRoomAlert.Request) {
@@ -126,7 +121,7 @@ extension MainMenuInteractor: MainMenuBusinessLogic {
         let loginData = loginString.data(using: String.Encoding.utf8)!
         let base64LoginString = loginData.base64EncodedString()
         
-        guard let url = URL(string: "http://127.0.0.1:8080/rooms/open") else {
+        guard let url = URL(string: "http://127.0.0.1:8080/rooms/inv_code") else {
             return
         }
         var req = URLRequest(url: url)
@@ -139,8 +134,6 @@ extension MainMenuInteractor: MainMenuBusinessLogic {
         ]
         let jsonData = try? JSONSerialization.data(withJSONObject: parameters)
         req.httpBody = jsonData
-        let group = DispatchGroup()
-        group.enter()
         let _ = URLSession.shared.dataTask(with: req) { [weak self] (data, response, error) in
             if error != nil {
                 return
@@ -149,13 +142,12 @@ extension MainMenuInteractor: MainMenuBusinessLogic {
                 do {
                     let object = try JSONDecoder().decode(Model.Room.self, from: data)
                     self?.presenter.presentPrivateRoom(Model.PrivateRoom.Response(room: object))
+                    print("\(object)")
                 } catch _ {
                     print("fetch data error or no room was found")
                 }
             }
-            group.leave()
         }.resume()
-        group.wait()
     }
 
     func loadCreatedRoom(_ request: Model.CreatedRoom.Request) {
@@ -163,7 +155,7 @@ extension MainMenuInteractor: MainMenuBusinessLogic {
         let loginData = loginString.data(using: String.Encoding.utf8)!
         let base64LoginString = loginData.base64EncodedString()
         
-        guard let url = URL(string: "http://127.0.0.1:8080/rooms/open") else {
+        guard let url = URL(string: "http://127.0.0.1:8080/rooms/create") else {
             return
         }
         var req = URLRequest(url: url)
@@ -179,8 +171,6 @@ extension MainMenuInteractor: MainMenuBusinessLogic {
         ]
         let jsonData = try? JSONSerialization.data(withJSONObject: parameters)
         req.httpBody = jsonData
-        let group = DispatchGroup()
-        group.enter()
         let _ = URLSession.shared.dataTask(with: req) { [weak self] (data, response, error) in
             if error != nil {
                 return
@@ -189,12 +179,11 @@ extension MainMenuInteractor: MainMenuBusinessLogic {
                 do {
                     let object = try JSONDecoder().decode(Model.Room.self, from: data)
                     self?.presenter.presentCreatedRoom(Model.CreatedRoom.Response(room: object))
+                    print("\(object)")
                 } catch _ {
                     print("fetch data error or no room was found")
                 }
             }
-            group.leave()
         }.resume()
-        group.wait()
     }
 }

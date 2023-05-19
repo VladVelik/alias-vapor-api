@@ -69,9 +69,9 @@ enum MainMenuModel {
     
     enum CreatedRoom {
         struct Request {
-            let is_private: String
+            let is_private: Bool
             let invitation_code: String
-            let received_points: String
+            let received_points: Int
         }
         struct Response {
             let room: Room
@@ -83,7 +83,7 @@ enum MainMenuModel {
     }
     
     struct Room: Decodable {
-        var id: Int?
+        var id: String?
         var is_private: Bool?
         var invitation_code: String?
         var received_points: Int?

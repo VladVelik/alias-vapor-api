@@ -40,6 +40,7 @@ struct UsersController: RouteCollection {
             throw Abort(.custom(code: 499, reasonPhrase: "Decode Failed"))
         }
         user.password = try Bcrypt.hash(user.password)
+        user.login_status = true
         try await user.save(on: req.db)
         return user.converToPublic()
     }

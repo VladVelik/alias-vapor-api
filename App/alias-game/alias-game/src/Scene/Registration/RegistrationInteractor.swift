@@ -54,19 +54,22 @@ extension RegistrationInteractor: RegistrationBusinessLogic {
         ]
         let jsonData = try? JSONSerialization.data(withJSONObject: parameters)
         req.httpBody = jsonData
-        let group = DispatchGroup()
-        group.enter()
         let _ = URLSession.shared.dataTask(with: req) { [weak self] (data, response, error) in
             if error != nil {
                 return
             }
-            if data != nil {
-                User.shared.username = request.username
-                User.shared.password = request.password
-                self?.presenter.presentMainMenu(Model.MainMenu.Response())
+            if let data = data {
+                do {
+                    let object = try JSONDecoder().decode(Model.User.self, from: data)
+                    User.shared.username = request.username
+                    User.shared.password = request.password
+                    DispatchQueue.main.async {
+                        self?.presenter.presentMainMenu(Model.MainMenu.Response())
+                    }
+                } catch {
+                    print("fetch data error")
+                }
             }
-            group.leave()
         }.resume()
-        group.wait()
     }
 }

@@ -150,7 +150,7 @@ final class MainMenuViewController: UIViewController {
     
     private func configureCreateRoomAlert() {
         let createButton = UIAlertAction(title: "Create", style: .default, handler: { [weak createRoomAlert, weak self] (action) -> Void in
-            self?.interactor.loadCreatedRoom(Model.CreatedRoom.Request(is_private: createRoomAlert?.textFields![0].text ?? "", invitation_code: createRoomAlert?.textFields![1].text ?? "", received_points: createRoomAlert?.textFields![2].text ?? ""))
+            self?.interactor.loadCreatedRoom(Model.CreatedRoom.Request(is_private: createRoomAlert?.textFields![0].text?.boolValue ?? false, invitation_code: createRoomAlert?.textFields![1].text ?? "", received_points: Int(createRoomAlert?.textFields![2].text ?? "0") ?? 0))
         })
         let cancelButton = UIAlertAction(title: "Cancel", style: .cancel, handler: { (action) -> Void in })
         self.createRoomAlert.addAction(createButton)

@@ -32,4 +32,11 @@ enum RegistrationModel {
         struct ViewModel { }
         struct Info { }
     }
+    
+    struct User: Decodable {
+        var id: String
+        var username: String
+        var email: String
+        var login_status: Bool
+    }
 }
