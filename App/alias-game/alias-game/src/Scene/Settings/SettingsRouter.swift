@@ -8,6 +8,7 @@
 import UIKit
 
 protocol SettingsRoutingLogic {
+    func routeToAuthorization()
     func routeToMainMenu()
 }
 
@@ -18,7 +19,13 @@ final class SettingsRouter {
 
 // MARK: - RoutingLogic
 extension SettingsRouter: SettingsRoutingLogic {
+    func routeToAuthorization() {
+        view?.navigationController?.modalPresentationStyle = .fullScreen
+        view?.navigationController?.pushViewController(AuthorizationAssembly.build(), animated: true)
+    }
+    
     func routeToMainMenu() {
-        view?.navigationController?.pushViewController(MainMenuAssembly.build(), animated: true)
+        view?.navigationController?.popViewController(animated: true)
+        //view?.navigationController?.pushViewController(MainMenuAssembly.build(), animated: true)
     }
 }

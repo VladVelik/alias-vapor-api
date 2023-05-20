@@ -10,6 +10,7 @@ import UIKit
 protocol SettingsDisplayLogic: AnyObject {
     typealias Model = SettingsModel
     func displayStart(_ viewModel: Model.Start.ViewModel)
+    func displayAuth(_ viewModel: Model.Auth.ViewModel)
     func displayMainMenu(_ viewModel: Model.MainMenu.ViewModel)
 }
 
@@ -25,6 +26,7 @@ final class SettingsViewController: UIViewController {
     
     private let settingsLabel = UILabel()
     private let toMenuButton = UIButton()
+    private let deleteUserButton = UIButton()
 
     // MARK: - LifeCycle
     init(
@@ -51,18 +53,24 @@ final class SettingsViewController: UIViewController {
     private func toMenuButtonWasTapped() {
         interactor.loadMainMenu(Model.MainMenu.Request())
     }
+    
+    @objc
+    private func deleteUserButtonWasTapped() {
+        interactor.loadAuth(Model.Auth.Request(username: User.shared.username, password: User.shared.password))
+    }
 
     // MARK: - Configuration
     private func configureUI() {
         self.view.backgroundColor = .systemYellow
         self.navigationController?.isNavigationBarHidden = true
         configureMainLabel()
+        configureDeleteUserButton()
         configureToMainButton()
     }
     
     private func configureMainLabel() {
         self.view.addSubview(settingsLabel)
-        settingsLabel.pinTop(to: self.view.topAnchor, (self.view.frame.height / 2.0) - 182.0)
+        settingsLabel.pinTop(to: self.view.topAnchor, (self.view.frame.height / 2.0) - 200.0)
         settingsLabel.pinCenter(to: self.view.centerXAnchor)
         settingsLabel.text = "Settings"
         settingsLabel.textColor = .black
@@ -73,17 +81,32 @@ final class SettingsViewController: UIViewController {
         self.view.addSubview(toMenuButton)
         toMenuButton.pinBottom(to: self.view.bottomAnchor, 44)
         toMenuButton.pin(to: self.view, [.left: 16, .right: 294])
-        let image = UIImage(systemName: "door.right.hand.open", withConfiguration: UIImage.SymbolConfiguration(font: .systemFont(ofSize: 30, weight: .regular)))
+        let image = UIImage(systemName: "arrowshape.backward.fill", withConfiguration: UIImage.SymbolConfiguration(font: .systemFont(ofSize: 30, weight: .regular)))
         toMenuButton.setImage(image, for: .normal)
         toMenuButton.tintColor = .systemGray
         toMenuButton.backgroundColor = .clear
         toMenuButton.addTarget(self, action: #selector(toMenuButtonWasTapped), for: .touchDown)
+    }
+    
+    private func configureDeleteUserButton() {
+        self.view.addSubview(deleteUserButton)
+        deleteUserButton.pinTop(to: self.view.topAnchor, (self.view.frame.height / 2.0) - 49.0)
+        deleteUserButton.pinCenter(to: self.view.centerXAnchor)
+        deleteUserButton.setTitle("Delete account", for: .normal)
+        deleteUserButton.setTitleColor(.red, for: .normal)
+        deleteUserButton.setTitleColor(.white, for: .highlighted)
+        deleteUserButton.titleLabel?.font = .systemFont(ofSize: 24, weight: .regular)
+        deleteUserButton.addTarget(self, action: #selector(deleteUserButtonWasTapped), for: .touchDown)
     }
 }
 
 extension SettingsViewController: SettingsDisplayLogic {
     func displayStart(_ viewModel: Model.Start.ViewModel) {
         self.configureUI()
+    }
+    
+    func displayAuth(_ viewModel: Model.Auth.ViewModel) {
+        router.routeToAuthorization()
     }
     
     func displayMainMenu(_ viewModel: Model.MainMenu.ViewModel) {

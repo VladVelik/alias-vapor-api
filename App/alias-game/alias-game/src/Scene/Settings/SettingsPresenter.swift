@@ -10,6 +10,7 @@ import UIKit
 protocol SettingsPresentationLogic {
     typealias Model = SettingsModel
     func presentStart(_ response: Model.Start.Response)
+    func presentAuth(_ response: Model.Auth.Response)
     func presentMainMenu(_ response: Model.MainMenu.Response)
 }
 
@@ -20,6 +21,10 @@ final class SettingsPresenter {
 
 // MARK: - PresentationLogic
 extension SettingsPresenter: SettingsPresentationLogic {
+    func presentAuth(_ response: Model.Auth.Response) {
+        view?.displayAuth(Model.Auth.ViewModel())
+    }
+    
     func presentStart(_ response: Model.Start.Response) {
         view?.displayStart(Model.Start.ViewModel())
     }
