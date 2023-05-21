@@ -59,6 +59,10 @@ final class MainMenuViewController: UIViewController {
         interactor.loadStart(Model.Start.Request())
     }
     
+    override func viewWillAppear(_ animated: Bool) {
+        self.navigationController?.isNavigationBarHidden = true
+    }
+    
     // MARK: - Configuration
     private func configureUI() {
         self.view.backgroundColor = .systemYellow

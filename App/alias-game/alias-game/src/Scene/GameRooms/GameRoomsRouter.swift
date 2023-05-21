@@ -1,5 +1,5 @@
 //
-//  SettingsRouter.swift
+//  GameRoomsRouter.swift
 //  alias-game
 //
 //  Created by Sosin Vladislav on 20.05.2023.
@@ -7,23 +7,24 @@
 
 import UIKit
 
-protocol SettingsRoutingLogic {
-    func routeToAuthorization()
+protocol GameRoomsRoutingLogic {
+    func routeToRoom()
     func routeToMainMenu()
 }
 
-final class SettingsRouter {
+final class GameRoomsRouter {
     // MARK: - Fields
     weak var view: UIViewController?
 }
 
 // MARK: - RoutingLogic
-extension SettingsRouter: SettingsRoutingLogic {
-    func routeToAuthorization() {
-        view?.navigationController?.pushViewController(AuthorizationAssembly.build(), animated: true)
+extension GameRoomsRouter: GameRoomsRoutingLogic {
+    func routeToRoom() {
+        // Nikt Y
     }
     
     func routeToMainMenu() {
         view?.navigationController?.popViewController(animated: true)
     }
 }
+

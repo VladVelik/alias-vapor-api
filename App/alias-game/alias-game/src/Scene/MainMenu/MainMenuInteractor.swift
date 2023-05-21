@@ -75,33 +75,7 @@ extension MainMenuInteractor: MainMenuBusinessLogic {
     func loadOpenRooms(_ request: Model.OpenRooms.Request) {
         let generator = UIImpactFeedbackGenerator(style: .medium)
         generator.impactOccurred()
-        
-        let loginString = String(format: "%@:%@", User.shared.username, User.shared.password)
-        let loginData = loginString.data(using: String.Encoding.utf8)!
-        let base64LoginString = loginData.base64EncodedString()
-        
-        guard let url = URL(string: "http://127.0.0.1:8080/rooms/open") else {
-            return
-        }
-        var req = URLRequest(url: url)
-        req.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        req.setValue("*/*", forHTTPHeaderField: "Accept")
-        req.setValue("Basic \(base64LoginString)", forHTTPHeaderField: "Authorization")
-        req.httpMethod = "GET"
-        let _ = URLSession.shared.dataTask(with: req) { [weak self] (data, response, error) in
-            if error != nil {
-                return
-            }
-            if let data = data {
-                do {
-                    let object = try JSONDecoder().decode([Model.Room].self, from: data)
-                    self?.presenter.presentOpenRooms(Model.OpenRooms.Response(open_rooms: Model.OpenRoomsList(open_rooms: object)))
-                    print("\(object)")
-                } catch _ {
-                    print("fetch data error")
-                }
-            }
-        }.resume()
+        presenter.presentOpenRooms(Model.OpenRooms.Response(/**open_rooms: Model.OpenRoomsList(open_rooms: object))*/))
     }
     
     func loadCreateRoomAlert(_ request: Model.CreateRoomAlert.Request) {

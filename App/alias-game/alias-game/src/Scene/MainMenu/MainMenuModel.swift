@@ -32,10 +32,10 @@ enum MainMenuModel {
     enum OpenRooms {
         struct Request { }
         struct Response {
-            let open_rooms: OpenRoomsList
+            //let open_rooms: OpenRoomsList
         }
         struct ViewModel {
-            let open_rooms: OpenRoomsList
+            //let open_rooms: OpenRoomsList
         }
         struct Info { }
     }

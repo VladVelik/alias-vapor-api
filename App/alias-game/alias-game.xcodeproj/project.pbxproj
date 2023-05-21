@@ -13,6 +13,12 @@
 		240429202A18EFD10019FBB5 /* SettingsModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2404291F2A18EFD10019FBB5 /* SettingsModel.swift */; };
 		240429222A18EFDE0019FBB5 /* SettingsRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 240429212A18EFDE0019FBB5 /* SettingsRouter.swift */; };
 		240429242A18EFF60019FBB5 /* SettingsAssembly.swift in Sources */ = {isa = PBXBuildFile; fileRef = 240429232A18EFF60019FBB5 /* SettingsAssembly.swift */; };
+		240429262A1967270019FBB5 /* GameRoomsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 240429252A1967260019FBB5 /* GameRoomsViewController.swift */; };
+		240429282A1967420019FBB5 /* GameRoomsInteractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 240429272A1967420019FBB5 /* GameRoomsInteractor.swift */; };
+		2404292A2A1967560019FBB5 /* GameRoomsPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 240429292A1967560019FBB5 /* GameRoomsPresenter.swift */; };
+		2404292C2A1967680019FBB5 /* GameRoomsModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2404292B2A1967680019FBB5 /* GameRoomsModel.swift */; };
+		2404292E2A19678A0019FBB5 /* GameRoomsRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2404292D2A19678A0019FBB5 /* GameRoomsRouter.swift */; };
+		240429302A19679D0019FBB5 /* GameRoomsAssembly.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2404292F2A19679D0019FBB5 /* GameRoomsAssembly.swift */; };
 		277C00942A165FFA00BF0FBB /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = 277C00932A165FFA00BF0FBB /* User.swift */; };
 		27DDCE782A13A93800DDEEA7 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27DDCE772A13A93800DDEEA7 /* AppDelegate.swift */; };
 		27DDCE7A2A13A93800DDEEA7 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27DDCE792A13A93800DDEEA7 /* SceneDelegate.swift */; };
@@ -53,6 +59,12 @@
 		2404291F2A18EFD10019FBB5 /* SettingsModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsModel.swift; sourceTree = "<group>"; };
 		240429212A18EFDE0019FBB5 /* SettingsRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsRouter.swift; sourceTree = "<group>"; };
 		240429232A18EFF60019FBB5 /* SettingsAssembly.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsAssembly.swift; sourceTree = "<group>"; };
+		240429252A1967260019FBB5 /* GameRoomsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameRoomsViewController.swift; sourceTree = "<group>"; };
+		240429272A1967420019FBB5 /* GameRoomsInteractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameRoomsInteractor.swift; sourceTree = "<group>"; };
+		240429292A1967560019FBB5 /* GameRoomsPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameRoomsPresenter.swift; sourceTree = "<group>"; };
+		2404292B2A1967680019FBB5 /* GameRoomsModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameRoomsModel.swift; sourceTree = "<group>"; };
+		2404292D2A19678A0019FBB5 /* GameRoomsRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameRoomsRouter.swift; sourceTree = "<group>"; };
+		2404292F2A19679D0019FBB5 /* GameRoomsAssembly.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameRoomsAssembly.swift; sourceTree = "<group>"; };
 		277C00932A165FFA00BF0FBB /* User.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
 		27DDCE742A13A93800DDEEA7 /* alias-game.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "alias-game.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		27DDCE772A13A93800DDEEA7 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -102,6 +114,12 @@
 		240429152A18D7100019FBB5 /* GameRooms */ = {
 			isa = PBXGroup;
 			children = (
+				240429252A1967260019FBB5 /* GameRoomsViewController.swift */,
+				240429272A1967420019FBB5 /* GameRoomsInteractor.swift */,
+				240429292A1967560019FBB5 /* GameRoomsPresenter.swift */,
+				2404292B2A1967680019FBB5 /* GameRoomsModel.swift */,
+				2404292D2A19678A0019FBB5 /* GameRoomsRouter.swift */,
+				2404292F2A19679D0019FBB5 /* GameRoomsAssembly.swift */,
 			);
 			path = GameRooms;
 			sourceTree = "<group>";
@@ -323,10 +341,12 @@
 				27DDCEA32A13AD0500DDEEA7 /* RegistrationInteractor.swift in Sources */,
 				27DDCEA72A13AD1B00DDEEA7 /* RegistrationModel.swift in Sources */,
 				27DDCEC12A13ADB200DDEEA7 /* MainMenuRouter.swift in Sources */,
+				2404292C2A1967680019FBB5 /* GameRoomsModel.swift in Sources */,
 				27DDCEB12A13AD5F00DDEEA7 /* AuthorizationPresenter.swift in Sources */,
 				27DDCEC62A13B06C00DDEEA7 /* UIView+pin.swift in Sources */,
 				27DDCEAD2A13AD4400DDEEA7 /* AuthorizationViewController.swift in Sources */,
 				27DDCEC32A13ADBC00DDEEA7 /* MainMenuAssembly.swift in Sources */,
+				240429262A1967270019FBB5 /* GameRoomsViewController.swift in Sources */,
 				27DDCEB32A13AD6A00DDEEA7 /* AuthorizationModel.swift in Sources */,
 				27DDCEAF2A13AD5100DDEEA7 /* AuthorizationInteractor.swift in Sources */,
 				27DDCE782A13A93800DDEEA7 /* AppDelegate.swift in Sources */,
@@ -340,15 +360,19 @@
 				27DDCEA12A13ACF800DDEEA7 /* RegistrationViewController.swift in Sources */,
 				27DDCE912A13AB7F00DDEEA7 /* LaunchScreenViewController.swift in Sources */,
 				27DDCEBB2A13AD9900DDEEA7 /* MainMenuInteractor.swift in Sources */,
+				240429302A19679D0019FBB5 /* GameRoomsAssembly.swift in Sources */,
 				240429222A18EFDE0019FBB5 /* SettingsRouter.swift in Sources */,
 				277C00942A165FFA00BF0FBB /* User.swift in Sources */,
 				27DDCEB52A13AD7500DDEEA7 /* AuthorizationRouter.swift in Sources */,
 				27DDCEB72A13AD8000DDEEA7 /* AuthorizationAssembly.swift in Sources */,
 				240429202A18EFD10019FBB5 /* SettingsModel.swift in Sources */,
 				2404291A2A18EF7E0019FBB5 /* SettingsViewController.swift in Sources */,
+				2404292A2A1967560019FBB5 /* GameRoomsPresenter.swift in Sources */,
 				27DDCE7A2A13A93800DDEEA7 /* SceneDelegate.swift in Sources */,
+				240429282A1967420019FBB5 /* GameRoomsInteractor.swift in Sources */,
 				27F845EE2A1760750051AAEA /* String+convertToBool.swift in Sources */,
 				2404291E2A18EFC00019FBB5 /* SettingsPresenter.swift in Sources */,
+				2404292E2A19678A0019FBB5 /* GameRoomsRouter.swift in Sources */,
 				27DDCE982A13ABB600DDEEA7 /* LaunchScreenModel.swift in Sources */,
 				27DDCEB92A13AD8C00DDEEA7 /* MainMenuViewController.swift in Sources */,
 				27DDCE962A13ABAA00DDEEA7 /* LaunchScreenPresenter.swift in Sources */,
