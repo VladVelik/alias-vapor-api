@@ -27,11 +27,11 @@ extension MainMenuRouter: MainMenuRoutingLogic {
     }
     
     func routeToSettings() {
-        // ...
+        view?.navigationController?.pushViewController(SettingsAssembly.build(), animated: true)
     }
     
     func routeToOpenRooms() {
-        // ...
+        view?.navigationController?.pushViewController(GameRoomsAssembly.build(), animated: true)
     }
     
     func routeToPrivateRoom() {
