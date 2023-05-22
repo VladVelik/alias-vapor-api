@@ -38,6 +38,18 @@
 		27DDCEC32A13ADBC00DDEEA7 /* MainMenuAssembly.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27DDCEC22A13ADBC00DDEEA7 /* MainMenuAssembly.swift */; };
 		27DDCEC62A13B06C00DDEEA7 /* UIView+pin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27DDCEC52A13B06C00DDEEA7 /* UIView+pin.swift */; };
 		27F845EE2A1760750051AAEA /* String+convertToBool.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27F845ED2A1760750051AAEA /* String+convertToBool.swift */; };
+		72F347972A18D153001108E3 /* GameRoomViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72F347962A18D153001108E3 /* GameRoomViewController.swift */; };
+		72F347992A18D160001108E3 /* GameRoomModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72F347982A18D160001108E3 /* GameRoomModel.swift */; };
+		72F3479B2A18D16B001108E3 /* GameRoomRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72F3479A2A18D16B001108E3 /* GameRoomRouter.swift */; };
+		72F3479D2A18D172001108E3 /* GameRoomPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72F3479C2A18D172001108E3 /* GameRoomPresenter.swift */; };
+		72F3479F2A18D17A001108E3 /* GameRoomAssembly.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72F3479E2A18D17A001108E3 /* GameRoomAssembly.swift */; };
+		72F347A12A18D195001108E3 /* GameRoomInteractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72F347A02A18D195001108E3 /* GameRoomInteractor.swift */; };
+		72F347A42A19312D001108E3 /* GameRoomSettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72F347A32A19312D001108E3 /* GameRoomSettingsViewController.swift */; };
+		72F347A62A19313A001108E3 /* GameRoomSettingsPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72F347A52A19313A001108E3 /* GameRoomSettingsPresenter.swift */; };
+		72F347A82A193144001108E3 /* GameRoomSettingsInteractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72F347A72A193144001108E3 /* GameRoomSettingsInteractor.swift */; };
+		72F347AA2A193150001108E3 /* GameRoomSettingsModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72F347A92A193150001108E3 /* GameRoomSettingsModel.swift */; };
+		72F347AC2A193158001108E3 /* GameRoomSettingsRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72F347AB2A193158001108E3 /* GameRoomSettingsRouter.swift */; };
+		72F347AE2A193161001108E3 /* GameRoomSettingsAssembly.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72F347AD2A193161001108E3 /* GameRoomSettingsAssembly.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -74,6 +86,18 @@
 		27DDCEC22A13ADBC00DDEEA7 /* MainMenuAssembly.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainMenuAssembly.swift; sourceTree = "<group>"; };
 		27DDCEC52A13B06C00DDEEA7 /* UIView+pin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIView+pin.swift"; sourceTree = "<group>"; };
 		27F845ED2A1760750051AAEA /* String+convertToBool.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+convertToBool.swift"; sourceTree = "<group>"; };
+		72F347962A18D153001108E3 /* GameRoomViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameRoomViewController.swift; sourceTree = "<group>"; };
+		72F347982A18D160001108E3 /* GameRoomModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameRoomModel.swift; sourceTree = "<group>"; };
+		72F3479A2A18D16B001108E3 /* GameRoomRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameRoomRouter.swift; sourceTree = "<group>"; };
+		72F3479C2A18D172001108E3 /* GameRoomPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameRoomPresenter.swift; sourceTree = "<group>"; };
+		72F3479E2A18D17A001108E3 /* GameRoomAssembly.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameRoomAssembly.swift; sourceTree = "<group>"; };
+		72F347A02A18D195001108E3 /* GameRoomInteractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameRoomInteractor.swift; sourceTree = "<group>"; };
+		72F347A32A19312D001108E3 /* GameRoomSettingsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameRoomSettingsViewController.swift; sourceTree = "<group>"; };
+		72F347A52A19313A001108E3 /* GameRoomSettingsPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameRoomSettingsPresenter.swift; sourceTree = "<group>"; };
+		72F347A72A193144001108E3 /* GameRoomSettingsInteractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameRoomSettingsInteractor.swift; sourceTree = "<group>"; };
+		72F347A92A193150001108E3 /* GameRoomSettingsModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameRoomSettingsModel.swift; sourceTree = "<group>"; };
+		72F347AB2A193158001108E3 /* GameRoomSettingsRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameRoomSettingsRouter.swift; sourceTree = "<group>"; };
+		72F347AD2A193161001108E3 /* GameRoomSettingsAssembly.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameRoomSettingsAssembly.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -148,6 +172,8 @@
 				27DDCE9E2A13ACB500DDEEA7 /* Registration */,
 				27DDCE9F2A13ACC400DDEEA7 /* Authorization */,
 				27DDCE9D2A13ACA400DDEEA7 /* MainMenu */,
+				72F347952A18D105001108E3 /* GameRoom */,
+				72F347A22A1930D2001108E3 /* GameRoomSettings */,
 				27DDCE822A13A93A00DDEEA7 /* LaunchScreen.storyboard */,
 			);
 			path = Scene;
@@ -212,6 +238,32 @@
 				27F845ED2A1760750051AAEA /* String+convertToBool.swift */,
 			);
 			path = Extension;
+			sourceTree = "<group>";
+		};
+		72F347952A18D105001108E3 /* GameRoom */ = {
+			isa = PBXGroup;
+			children = (
+				72F347962A18D153001108E3 /* GameRoomViewController.swift */,
+				72F347A02A18D195001108E3 /* GameRoomInteractor.swift */,
+				72F3479C2A18D172001108E3 /* GameRoomPresenter.swift */,
+				72F347982A18D160001108E3 /* GameRoomModel.swift */,
+				72F3479A2A18D16B001108E3 /* GameRoomRouter.swift */,
+				72F3479E2A18D17A001108E3 /* GameRoomAssembly.swift */,
+			);
+			path = GameRoom;
+			sourceTree = "<group>";
+		};
+		72F347A22A1930D2001108E3 /* GameRoomSettings */ = {
+			isa = PBXGroup;
+			children = (
+				72F347A32A19312D001108E3 /* GameRoomSettingsViewController.swift */,
+				72F347A72A193144001108E3 /* GameRoomSettingsInteractor.swift */,
+				72F347A52A19313A001108E3 /* GameRoomSettingsPresenter.swift */,
+				72F347A92A193150001108E3 /* GameRoomSettingsModel.swift */,
+				72F347AB2A193158001108E3 /* GameRoomSettingsRouter.swift */,
+				72F347AD2A193161001108E3 /* GameRoomSettingsAssembly.swift */,
+			);
+			path = GameRoomSettings;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -287,21 +339,31 @@
 				27DDCEBD2A13ADA200DDEEA7 /* MainMenuPresenter.swift in Sources */,
 				27DDCE9C2A13AC0C00DDEEA7 /* LaunchScreenAssembly.swift in Sources */,
 				27DDCEA32A13AD0500DDEEA7 /* RegistrationInteractor.swift in Sources */,
+				72F347992A18D160001108E3 /* GameRoomModel.swift in Sources */,
+				72F3479F2A18D17A001108E3 /* GameRoomAssembly.swift in Sources */,
 				27DDCEA72A13AD1B00DDEEA7 /* RegistrationModel.swift in Sources */,
+				72F347A42A19312D001108E3 /* GameRoomSettingsViewController.swift in Sources */,
 				27DDCEC12A13ADB200DDEEA7 /* MainMenuRouter.swift in Sources */,
 				27DDCEB12A13AD5F00DDEEA7 /* AuthorizationPresenter.swift in Sources */,
+				72F3479B2A18D16B001108E3 /* GameRoomRouter.swift in Sources */,
 				27DDCEC62A13B06C00DDEEA7 /* UIView+pin.swift in Sources */,
 				27DDCEAD2A13AD4400DDEEA7 /* AuthorizationViewController.swift in Sources */,
+				72F347A62A19313A001108E3 /* GameRoomSettingsPresenter.swift in Sources */,
 				27DDCEC32A13ADBC00DDEEA7 /* MainMenuAssembly.swift in Sources */,
 				27DDCEB32A13AD6A00DDEEA7 /* AuthorizationModel.swift in Sources */,
 				27DDCEAF2A13AD5100DDEEA7 /* AuthorizationInteractor.swift in Sources */,
+				72F347AC2A193158001108E3 /* GameRoomSettingsRouter.swift in Sources */,
 				27DDCE782A13A93800DDEEA7 /* AppDelegate.swift in Sources */,
+				72F347AA2A193150001108E3 /* GameRoomSettingsModel.swift in Sources */,
 				27DDCEBF2A13ADAA00DDEEA7 /* MainMenuModel.swift in Sources */,
+				72F347A82A193144001108E3 /* GameRoomSettingsInteractor.swift in Sources */,
 				27DDCEA52A13AD1100DDEEA7 /* RegistrationPresenter.swift in Sources */,
 				27DDCEA92A13AD2A00DDEEA7 /* RegistrationRouter.swift in Sources */,
+				72F347972A18D153001108E3 /* GameRoomViewController.swift in Sources */,
 				27DDCEAB2A13AD3500DDEEA7 /* RegistrationAssembly.swift in Sources */,
 				27DDCE942A13AB9B00DDEEA7 /* LaunchScreenInteractor.swift in Sources */,
 				27DDCEA12A13ACF800DDEEA7 /* RegistrationViewController.swift in Sources */,
+				72F347A12A18D195001108E3 /* GameRoomInteractor.swift in Sources */,
 				27DDCE912A13AB7F00DDEEA7 /* LaunchScreenViewController.swift in Sources */,
 				27DDCEBB2A13AD9900DDEEA7 /* MainMenuInteractor.swift in Sources */,
 				277C00942A165FFA00BF0FBB /* User.swift in Sources */,
@@ -313,6 +375,8 @@
 				27DDCEB92A13AD8C00DDEEA7 /* MainMenuViewController.swift in Sources */,
 				27DDCE962A13ABAA00DDEEA7 /* LaunchScreenPresenter.swift in Sources */,
 				27DDCE9A2A13ABC200DDEEA7 /* LaunchScreenRouter.swift in Sources */,
+				72F347AE2A193161001108E3 /* GameRoomSettingsAssembly.swift in Sources */,
+				72F3479D2A18D172001108E3 /* GameRoomPresenter.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

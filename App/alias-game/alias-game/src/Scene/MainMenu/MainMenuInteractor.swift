@@ -178,8 +178,9 @@ extension MainMenuInteractor: MainMenuBusinessLogic {
             if let data = data {
                 do {
                     let object = try JSONDecoder().decode(Model.Room.self, from: data)
+                    User.shared.roomID = object.id ?? ""
+                    User.shared.role = "admin"
                     self?.presenter.presentCreatedRoom(Model.CreatedRoom.Response(room: object))
-                    print("\(object)")
                 } catch _ {
                     print("fetch data error or no room was found")
                 }

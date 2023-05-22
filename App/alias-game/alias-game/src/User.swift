@@ -10,7 +10,12 @@ final class User {
     static let shared: User = User()
     
     public var username: String = ""
+    public var id: String = ""
     public var password: String = ""
+    var roomID: String = ""
+    var teamID: String = ""
+    var role: String = ""
+
     
     // MARK: - LifeCycle
     private init() { }
