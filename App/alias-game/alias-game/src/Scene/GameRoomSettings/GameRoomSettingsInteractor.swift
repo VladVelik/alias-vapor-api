@@ -12,6 +12,7 @@ protocol GameRoomSettingsBusinessLogic {
     func loadStart(_ request: Model.Start.Request)
     func pushGameRoom(_ request: Model.PushGameRoom.Request)
     func deleteGameRoom(_ request: Model.DeleteGameRoom.Request)
+    func makePrivate(_ request: Model.MakePrivate.Request)
 }
 
 final class GameRoomSettingsInteractor: GameRoomSettingsBusinessLogic {
@@ -41,15 +42,12 @@ final class GameRoomSettingsInteractor: GameRoomSettingsBusinessLogic {
             }
             if let data = data {
                 do {
-                    let res = try JSONDecoder().decode([String:Int].self, from: data)
-                    var invCode: String = ""
-                    var teamCount: Int = 0
-                    for (code, count) in res {
-                        invCode = code
-                        teamCount = count
-                    }
+                    let res = try JSONDecoder().decode(Model.RoomOnSteroids.self, from: data)
+                    var invCode: String = res.invitation_code
+                    var teamCount: Int = res.teams_count
+                    var isPrivate: Bool = res.is_private
                     DispatchQueue.main.async {
-                        self?.presenter.presentStart(Model.Start.Response(teamCount: teamCount, invCode: invCode))
+                        self?.presenter.presentStart(Model.Start.Response(teamCount: teamCount, invCode: invCode, isPrivate: isPrivate))
                     }
                 } catch _ {
                     print("fetch data error or no room was found")
@@ -128,6 +126,40 @@ final class GameRoomSettingsInteractor: GameRoomSettingsBusinessLogic {
         }
     }
     
+    func makePrivate(_ request: Model.MakePrivate.Request) {
+        let loginString = String(format: "%@:%@", User.shared.username, User.shared.password)
+        let loginData = loginString.data(using: String.Encoding.utf8)!
+        let base64LoginString = loginData.base64EncodedString()
+        
+        guard let url = URL(string: "http://127.0.0.1:8080/rooms/makePrivate/\(User.shared.roomID)") else {
+            return
+        }
+        var req = URLRequest(url: url)
+        req.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        req.setValue("*/*", forHTTPHeaderField: "Accept")
+        req.setValue("Basic \(base64LoginString)", forHTTPHeaderField: "Authorization")
+        req.httpMethod = "PUT"
+        let parameters: [String: Any] = [
+            "invitation_code": request.invCode
+        ]
+        let jsonData = try? JSONSerialization.data(withJSONObject: parameters)
+        req.httpBody = jsonData
+        let _ = URLSession.shared.dataTask(with: req) { [weak self] (data, response, error) in
+            if error != nil {
+                return
+            }
+            if let response = response as? HTTPURLResponse {
+                if response.statusCode == 200 {
+                    DispatchQueue.main.async {
+                        self?.presenter.presentMakePrivate(Model.MakePrivate.Response(invCode: request.invCode))
+                    }
+                } else {
+                    print("Error: \(response.statusCode)")
+                }
+            }
+        }.resume()
+    }
+    
     func deleteGameRoom(_ request: Model.DeleteGameRoom.Request) {
         let loginString = String(format: "%@:%@", User.shared.username, User.shared.password)
         let loginData = loginString.data(using: String.Encoding.utf8)!
@@ -148,7 +180,7 @@ final class GameRoomSettingsInteractor: GameRoomSettingsBusinessLogic {
             }
             if let response = response as? HTTPURLResponse {
                 if response.statusCode == 200 {
-                    print("User account deleted successfully")
+                    print("Room deleted successfully")
                     DispatchQueue.main.async {
                         self?.presenter.presentMainMenu(Model.DeleteGameRoom.Response())
                     }

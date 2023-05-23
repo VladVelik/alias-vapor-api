@@ -15,6 +15,9 @@ protocol GameRoomPresentationLogic {
     func presentEditPoints(_ response: Model.CurrentRoomPoints.Response)
     func presentDeletionFromRoom(_ response: Model.DeleteFromRoom.Response)
     func presentChangeTeam(_ response: Model.ChangeTeam.Response)
+    func presentStartGame(_ response: Model.StartGame.Response)
+    func presentPauseGame(_ response: Model.PauseGame.Response)
+    func presentContinueGame(_ response: Model.ContinueGame.Response)
 }
 
 final class GameRoomPresenter: GameRoomPresentationLogic {
@@ -44,5 +47,17 @@ final class GameRoomPresenter: GameRoomPresentationLogic {
     
     func presentChangeTeam(_ response: Model.ChangeTeam.Response) {
         view?.displayChangingTeam(Model.ChangeTeam.ViewModel(user: response.user, teamID: response.teamID))
+    }
+    
+    func presentStartGame(_ response: Model.StartGame.Response) {
+        view?.displayStartGame(Model.StartGame.ViewModel(obj: response.obj))
+    }
+    
+    func presentPauseGame(_ response: Model.PauseGame.Response) {
+        view?.displayPauseGame(Model.PauseGame.ViewModel())
+    }
+    
+    func presentContinueGame(_ response: Model.ContinueGame.Response) {
+        view?.displayContinueGame(Model.ContinueGame.ViewModel())
     }
 }

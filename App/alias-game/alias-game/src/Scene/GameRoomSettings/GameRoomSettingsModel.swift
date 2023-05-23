@@ -13,10 +13,12 @@ enum GameRoomSettingsModel {
         struct Response {
             var teamCount: Int
             var invCode: String
+            var isPrivate: Bool
         }
         struct ViewModel {
             var teamCount: Int
             var invCode: String
+            var isPrivate: Bool
         }
         struct Info { }
     }
@@ -28,6 +30,19 @@ enum GameRoomSettingsModel {
         }
         struct Response { }
         struct ViewModel { }
+        struct Info { }
+    }
+    
+    enum MakePrivate {
+        struct Request {
+            var invCode: String
+        }
+        struct Response {
+            var invCode: String
+        }
+        struct ViewModel {
+            var invCode: String
+        }
         struct Info { }
     }
     
@@ -43,5 +58,11 @@ enum GameRoomSettingsModel {
         var room_id: String
         var name: String
         var points: Int
+    }
+    
+    struct RoomOnSteroids: Decodable {
+        var teams_count: Int
+        var invitation_code: String
+        var is_private: Bool
     }
 }

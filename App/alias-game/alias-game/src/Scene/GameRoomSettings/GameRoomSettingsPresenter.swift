@@ -12,6 +12,7 @@ protocol GameRoomSettingsPresentationLogic {
     func presentStart(_ response: Model.Start.Response)
     func presentGameRoom(_ response: Model.PushGameRoom.Response)
     func presentMainMenu(_ response: Model.DeleteGameRoom.Response)
+    func presentMakePrivate(_ response: Model.MakePrivate.Response)
 }
 
 final class GameRoomSettingsPresenter: GameRoomSettingsPresentationLogic {
@@ -20,7 +21,7 @@ final class GameRoomSettingsPresenter: GameRoomSettingsPresentationLogic {
     weak var view: GameRoomSettingsDisplayLogic?
 
     func presentStart(_ response: GameRoomSettingsModel.Start.Response) {
-        view?.displayStart(GameRoomSettingsModel.Start.ViewModel(teamCount: response.teamCount, invCode: response.invCode))
+        view?.displayStart(GameRoomSettingsModel.Start.ViewModel(teamCount: response.teamCount, invCode: response.invCode, isPrivate: response.isPrivate))
     }
     
     func presentGameRoom(_ response: Model.PushGameRoom.Response) {
@@ -29,6 +30,10 @@ final class GameRoomSettingsPresenter: GameRoomSettingsPresentationLogic {
     
     func presentMainMenu(_ response: Model.DeleteGameRoom.Response) {
         view?.displayMainMenu(Model.DeleteGameRoom.ViewModel())
+    }
+    
+    func presentMakePrivate(_ response: Model.MakePrivate.Response) {
+        view?.displayPrivate(Model.MakePrivate.ViewModel(invCode: response.invCode))
     }
 }
 

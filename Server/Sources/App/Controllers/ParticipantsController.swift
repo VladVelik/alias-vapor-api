@@ -124,7 +124,24 @@ struct ParticipantsController: RouteCollection {
         let participant = try await Participant.query(on: req.db)
             .filter(\.$userID == user.id!)
             .first()
+        
+        let room_id = participant?.roomID
+        let room = try await Room.query(on: req.db)
+            .filter(\.$id == room_id!)
+            .first()
         try await participant!.delete(on: req.db)
+        
+        let participants = try await Participant.query(on: req.db)
+            .filter(\.$roomID == room_id!)
+            .all()
+        if participants.isEmpty {
+            let teams = try await Team.query(on: req.db)
+                .filter(\.$roomID == room_id!)
+                .all()
+            try await teams.delete(on: req.db)
+            try await room!.delete(on: req.db)
+        }
+        
         return .ok
     }
 }

@@ -15,6 +15,9 @@ protocol GameRoomDisplayLogic: AnyObject {
     func displayEditingPoints(_ viewModel: Model.CurrentRoomPoints.ViewModel)
     func displayDeletionFromRoom(_ viewModel: Model.DeleteFromRoom.ViewModel)
     func displayChangingTeam(_ viewModel: Model.ChangeTeam.ViewModel)
+    func displayStartGame(_ response: Model.StartGame.ViewModel)
+    func displayPauseGame(_ response: Model.PauseGame.ViewModel)
+    func displayContinueGame(_ response: Model.ContinueGame.ViewModel)
 }
 
 final class GameRoomViewController: UIViewController {
@@ -27,12 +30,16 @@ final class GameRoomViewController: UIViewController {
     
     var participants: [Model.User] = []
     var teams: [Model.Team] = []
+    var words: [String] = []
+    var gameStatus: String = "ALIAS"
     var timer: Timer?
     var tableView: UITableView!
     var startButton: UIButton!
     var pauseButton: UIButton!
     var continueButton: UIButton!
     var settingsButton: UIButton!
+    var wordsCard: UIView = UIView()
+    var wordCardLabel = UILabel()
     
     init(router: GameRoomRoutingLogic, interactor: GameRoomBusinessLogic) {
         self.router = router
@@ -60,6 +67,9 @@ final class GameRoomViewController: UIViewController {
     
     // MARK: - Configuration
     private func configureUI() {
+        for view in self.view.subviews {
+            view.removeFromSuperview()
+        }
         view.backgroundColor = .white
         self.title = "Game Room"
         
@@ -71,6 +81,7 @@ final class GameRoomViewController: UIViewController {
         setupTableView()
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleTableViewTap))
         tableView.addGestureRecognizer(tapGesture)
+        configureWordsCard()
     }
     
     private func setupNavigationBar() {
@@ -83,12 +94,15 @@ final class GameRoomViewController: UIViewController {
         
         startButton = UIButton(type: .system)
         startButton.setTitle("Start", for: .normal)
+        startButton.addTarget(self, action: #selector(startButtonTapped), for: .touchUpInside)
         
         pauseButton = UIButton(type: .system)
         pauseButton.setTitle("Pause", for: .normal)
+        pauseButton.addTarget(self, action: #selector(pauseButtonTapped), for: .touchUpInside)
         
         continueButton = UIButton(type: .system)
         continueButton.setTitle("Continue", for: .normal)
+        continueButton.addTarget(self, action: #selector(continueButtonTapped), for: .touchUpInside)
         
         settingsButton = UIButton(type: .system)
         settingsButton.setImage(UIImage(systemName: "gearshape"), for: .normal)
@@ -130,8 +144,21 @@ final class GameRoomViewController: UIViewController {
         NSLayoutConstraint.activate([
             tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+            tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -250)
         ])
+    }
+    
+    private func configureWordsCard() {
+        self.view.addSubview(wordsCard)
+        wordsCard.pin(to: self.view, [.bottom: 50, .left: 50, .right: 50, .top: 650])
+        wordsCard.backgroundColor = .systemGray3
+        wordsCard.addSubview(wordCardLabel)
+        wordCardLabel.pin(to: wordsCard)
+        wordCardLabel.textAlignment = .center
+        wordsCard.layer.cornerRadius = 10
+        wordCardLabel.text = gameStatus
+        wordCardLabel.textColor = .black
+        wordCardLabel.font = .systemFont(ofSize: 30, weight: .regular)
     }
     
     private func showEditRoomPoints(_ current: Int) {
@@ -162,17 +189,17 @@ final class GameRoomViewController: UIViewController {
     
     @objc
     private func startButtonTapped() {
-        interactor.startGame(Model.GameStatus.Request(room_id: User.shared.roomID))
+        interactor.startGame(Model.StartGame.Request(room_id: User.shared.roomID))
     }
     
     @objc
     private func pauseButtonTapped() {
-        interactor.pauseGame(Model.GameStatus.Request(room_id: User.shared.roomID))
+        interactor.pauseGame(Model.PauseGame.Request(room_id: User.shared.roomID))
     }
     
     @objc
     private func continueButtonTapped() {
-        interactor.contineGame(Model.GameStatus.Request(room_id: User.shared.roomID))
+        interactor.contineGame(Model.ContinueGame.Request(room_id: User.shared.roomID))
     }
     
     @objc
@@ -347,6 +374,7 @@ extension GameRoomViewController: GameRoomDisplayLogic {
         for participant in participants {
             if participant.id == currentUserID {
                 isInRoom = true
+                User.shared.role = participant.role
                 break
             }
         }
@@ -358,7 +386,7 @@ extension GameRoomViewController: GameRoomDisplayLogic {
                 for user in users {
                     if user.id == currentUserID {
                         isInRoom = true
-//                        User.shared.role = user.key
+                        User.shared.role = user.role
                         break
                     }
                 }
@@ -388,20 +416,10 @@ extension GameRoomViewController: GameRoomDisplayLogic {
     
     func displayDeletionFromRoom(_ viewModel: Model.DeleteFromRoom.ViewModel) {
         let id = viewModel.participant_id
-        
-//        for i in participants {
-//            if i.value.id == id {
-//                participants.removeValue(forKey: i.key)
-//            }
-//        }
+
         participants.removeAll(where: { $0.id == id })
         
         teams.indices.forEach { index in
-//            for i in teams[index].members {
-//                if i.value.id == id {
-//                    participants.removeValue(forKey: i.key)
-//                }
-//            }
             teams[index].members.removeAll(where: { $0.id == id })
         }
         
@@ -411,20 +429,9 @@ extension GameRoomViewController: GameRoomDisplayLogic {
     func displayChangingTeam(_ viewModel: Model.ChangeTeam.ViewModel) {
         let id = viewModel.user.id
         
-//        for i in participants {
-//            if i.value.id == id {
-//                participants.removeValue(forKey: i.key)
-//            }
-//        }
-        
         participants.removeAll(where: { $0.id == id })
         
         teams.indices.forEach { index in
-//            for i in teams[index].members {
-//                if i.value.id == id {
-//                    participants.removeValue(forKey: i.key)
-//                }
-//            }
             teams[index].members.removeAll(where: { $0.id == id })
         }
         
@@ -436,5 +443,20 @@ extension GameRoomViewController: GameRoomDisplayLogic {
         }
         
         tableView.reloadData()
+    }
+    
+    func displayStartGame(_ response: Model.StartGame.ViewModel) {
+        gameStatus = "START"
+        words = response.obj.words
+        gameStatus = words[0]
+    }
+    
+    func displayPauseGame(_ response: Model.PauseGame.ViewModel) {
+        gameStatus = "PAUSE"
+    }
+    
+    func displayContinueGame(_ response: Model.ContinueGame.ViewModel) {
+        gameStatus = "CONTINUE"
+        gameStatus = words[0]
     }
 }

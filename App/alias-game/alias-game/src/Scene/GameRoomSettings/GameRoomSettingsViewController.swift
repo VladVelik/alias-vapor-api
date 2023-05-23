@@ -12,6 +12,7 @@ protocol GameRoomSettingsDisplayLogic: AnyObject {
     func displayStart(_ viewModel: Model.Start.ViewModel)
     func displayGameRoom(_ viewModel: Model.PushGameRoom.ViewModel)
     func displayMainMenu(_ viewModel: Model.DeleteGameRoom.ViewModel)
+    func displayPrivate(_ viewModel: Model.MakePrivate.ViewModel)
 }
 
 final class GameRoomSettingsViewController: UIViewController {
@@ -27,7 +28,9 @@ final class GameRoomSettingsViewController: UIViewController {
     let teamCountStepper = UIStepper()
     let codeLabel = UILabel()
     let copyButton = UIButton()
+    let makePrivate = UIButton()
     let deleteButton = UIButton()
+    var isPrivate = false
     
     var oldTeamCount: Int = 2
     var teamCount: Int = 2 {
@@ -54,6 +57,9 @@ final class GameRoomSettingsViewController: UIViewController {
     
     // MARK: - Configuration
     private func configureUI() {
+        for view in self.view.subviews {
+                    view.removeFromSuperview()
+                }
         view.backgroundColor = .white
         self.title = "Game Room Settings"
         
@@ -90,6 +96,13 @@ final class GameRoomSettingsViewController: UIViewController {
         copyButton.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(copyButton)
         
+        if !isPrivate {
+            makePrivate.setTitle("Make private", for: .normal)
+            makePrivate.setTitleColor(.systemRed, for: .normal)
+            makePrivate.translatesAutoresizingMaskIntoConstraints = false
+            view.addSubview(makePrivate)
+        }
+        
         // Configure delete button
         deleteButton.setTitle("Delete", for: .normal)
         deleteButton.setTitleColor(.systemRed, for: .normal)
@@ -111,15 +124,23 @@ final class GameRoomSettingsViewController: UIViewController {
             copyButton.leadingAnchor.constraint(equalTo: codeLabel.trailingAnchor, constant: 20),
             
             deleteButton.topAnchor.constraint(equalTo: codeLabel.bottomAnchor, constant: 20),
-            deleteButton.centerXAnchor.constraint(equalTo: view.centerXAnchor)
+            deleteButton.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -20),
         ])
+        
+        if !isPrivate {
+            NSLayoutConstraint.activate([
+                makePrivate.topAnchor.constraint(equalTo: codeLabel.bottomAnchor, constant: 20),
+                makePrivate.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 20),
+            ])
+        }
         
         updateCodeLabel()
     }
     
     private func setupActions() {
         teamCountStepper.addTarget(self, action: #selector(teamCountStepperValueChanged(_:)), for: .valueChanged)
-        codeLabel.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(copyCodeToClipboard)))
+        copyButton.addTarget(self, action: #selector(copyCodeToClipboard), for: .touchUpInside)
+        makePrivate.addTarget(self, action: #selector(makePrivateTapped), for: .touchUpInside)
         deleteButton.addTarget(self, action: #selector(deleteButtonTapped), for: .touchUpInside)
     }
     
@@ -135,6 +156,22 @@ final class GameRoomSettingsViewController: UIViewController {
     @objc
     private func copyCodeToClipboard() {
         UIPasteboard.general.string = codeLabel.text
+    }
+    
+    @objc
+    private func makePrivateTapped() {
+        let alertController = UIAlertController(title: "Create Inv Code", message: nil, preferredStyle: .alert)
+        
+        alertController.addTextField { (textField) in
+            textField.placeholder = "Code"
+        }
+        alertController.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+        alertController.addAction(UIAlertAction(title: "OK", style: .default) { (_) in
+            if let textField = alertController.textFields?.first, let text = textField.text {
+                self.interactor.makePrivate(Model.MakePrivate.Request(invCode: text))
+            }
+        })
+        present(alertController, animated: true)
     }
     
     @objc
@@ -154,6 +191,7 @@ extension GameRoomSettingsViewController: GameRoomSettingsDisplayLogic {
         oldTeamCount = viewModel.teamCount
         teamCount = viewModel.teamCount
         codeLabel.text = viewModel.invCode
+        isPrivate = viewModel.isPrivate
         if viewModel.invCode.isEmpty {
             codeLabel.text = "У данной комнаты нет кода"
             copyButton.isHidden = true
@@ -167,6 +205,17 @@ extension GameRoomSettingsViewController: GameRoomSettingsDisplayLogic {
     
     func displayMainMenu(_ viewModel: Model.DeleteGameRoom.ViewModel) {
         router.pushMainMenu()
+    }
+    
+    func displayPrivate(_ viewModel: Model.MakePrivate.ViewModel) {
+        codeLabel.text = viewModel.invCode
+        isPrivate = true
+        copyButton.isHidden = false
+        if viewModel.invCode.isEmpty {
+            codeLabel.text = "У данной комнаты нет кода"
+            copyButton.isHidden = true
+        }
+        self.configureUI()
     }
 }
 

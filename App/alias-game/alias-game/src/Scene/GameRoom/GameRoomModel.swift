@@ -87,6 +87,43 @@ enum GameRoomModel {
         struct Info { }
     }
     
+    enum StartGame {
+        struct Request {
+            var room_id: String
+        }
+        struct Response {
+            var obj: GamePair
+        }
+        struct ViewModel {
+            var obj: GamePair
+        }
+        struct Info { }
+    }
+    
+    enum PauseGame {
+        struct Request {
+            var room_id: String
+        }
+        struct Response { }
+        struct ViewModel { }
+        struct Info { }
+    }
+    
+    enum ContinueGame {
+        struct Request {
+            var room_id: String
+        }
+        struct Response { }
+        struct ViewModel { }
+        struct Info { }
+    }
+    
+    struct GamePair: Decodable {
+        var words: [String]
+        var team_1_id: String
+        var team_2_id: String
+    }
+    
     enum ChangeTeam {
         struct Request {
             var teamID: String
@@ -107,6 +144,7 @@ enum GameRoomModel {
         var username: String
         var email: String
         var login_status: Bool
+        var role: String
     }
 
     struct Team {

@@ -16,9 +16,9 @@ protocol GameRoomBusinessLogic {
     func editPointsOfRoom(_ request: Model.EditPoints.Request)
     func changeRole(_ request: Model.ChangeRole.Request)
     func deleteFromRoom(_ request: Model.DeleteFromRoom.Request)
-    func startGame(_ request: Model.GameStatus.Request)
-    func pauseGame(_ request: Model.GameStatus.Request)
-    func contineGame(_ request: Model.GameStatus.Request)
+    func startGame(_ request: Model.StartGame.Request)
+    func pauseGame(_ request: Model.PauseGame.Request)
+    func contineGame(_ request: Model.ContinueGame.Request)
     func changeTeam(_ request: Model.ChangeTeam.Request)
 }
 
@@ -70,6 +70,9 @@ final class GameRoomInteractor: GameRoomBusinessLogic {
                     }
                 } catch {
                     print("Error decoding JSON: \(error)")
+                    DispatchQueue.main.async {
+                        self.presenter.presentBackScreen(Model.GoBack.Response())
+                    }
                 }
             } else {
                 print("fetch data error or no room was found")
@@ -168,7 +171,6 @@ final class GameRoomInteractor: GameRoomBusinessLogic {
                 do {
                     let object = try JSONDecoder().decode(Model.Room.self, from: data)
                     print("New room points!")
-                    // TODO: Обновить на экране, если будем отображать поинты в принципе
                 } catch _ {
                     print("fetch data error or no room was found")
                 }
@@ -191,7 +193,7 @@ final class GameRoomInteractor: GameRoomBusinessLogic {
         req.httpMethod = "PUT"
         
         let parameters: [String: Any] = [
-            "participant_id": request.participant_id,
+            "user_id": request.participant_id,
             "role": request.role
         ]
         let jsonData = try? JSONSerialization.data(withJSONObject: parameters)
@@ -202,7 +204,6 @@ final class GameRoomInteractor: GameRoomBusinessLogic {
             }
             if let data = data {
                 do {
-                    // TODO: Обновить на экране, если будем отображать админов в принципе
                     print("New admin!")
                 } catch _ {
                     print("fetch data error or no room was found")
@@ -240,7 +241,7 @@ final class GameRoomInteractor: GameRoomBusinessLogic {
         }.resume()
     }
     
-    func startGame(_ request: Model.GameStatus.Request) {
+    func startGame(_ request: Model.StartGame.Request) {
         let loginString = String(format: "%@:%@", User.shared.username, User.shared.password)
         let loginData = loginString.data(using: String.Encoding.utf8)!
         let base64LoginString = loginData.base64EncodedString()
@@ -259,7 +260,10 @@ final class GameRoomInteractor: GameRoomBusinessLogic {
             }
             if let data = data {
                 do {
-                    // TODO: Добавить функционал
+                    let object = try JSONDecoder().decode(Model.GamePair.self, from: data)
+                    DispatchQueue.main.async {
+                        self?.presenter.presentStartGame(Model.StartGame.Response(obj: object))
+                    }
                     print("Игра запущена")
                 } catch _ {
                     print("fetch data error or no room was found")
@@ -268,7 +272,7 @@ final class GameRoomInteractor: GameRoomBusinessLogic {
         }.resume()
     }
     
-    func pauseGame(_ request: Model.GameStatus.Request) {
+    func pauseGame(_ request: Model.PauseGame.Request) {
         let loginString = String(format: "%@:%@", User.shared.username, User.shared.password)
         let loginData = loginString.data(using: String.Encoding.utf8)!
         let base64LoginString = loginData.base64EncodedString()
@@ -287,7 +291,9 @@ final class GameRoomInteractor: GameRoomBusinessLogic {
             }
             if let data = data {
                 do {
-                    // TODO: Добавить функционал
+                    DispatchQueue.main.async {
+                        self?.presenter.presentPauseGame(Model.PauseGame.Response())
+                    }
                     print("Игра поставлена на паузу")
                 } catch _ {
                     print("fetch data error or no room was found")
@@ -296,7 +302,7 @@ final class GameRoomInteractor: GameRoomBusinessLogic {
         }.resume()
     }
     
-    func contineGame(_ request: Model.GameStatus.Request) {
+    func contineGame(_ request: Model.ContinueGame.Request) {
         let loginString = String(format: "%@:%@", User.shared.username, User.shared.password)
         let loginData = loginString.data(using: String.Encoding.utf8)!
         let base64LoginString = loginData.base64EncodedString()
@@ -315,7 +321,9 @@ final class GameRoomInteractor: GameRoomBusinessLogic {
             }
             if let data = data {
                 do {
-                    // TODO: Добавить функционал
+                    DispatchQueue.main.async {
+                        self?.presenter.presentContinueGame(Model.ContinueGame.Response())
+                    }
                     print("Игра возобновлена")
                 } catch _ {
                     print("fetch data error or no room was found")
@@ -349,7 +357,7 @@ final class GameRoomInteractor: GameRoomBusinessLogic {
             }
             if let data = data {
                 do {
-                    let user = Model.User(id: User.shared.id, username: User.shared.username, email: "", login_status: true)
+                    let user = Model.User(id: User.shared.id, username: User.shared.username, email: "", login_status: true, role: User.shared.role)
                     DispatchQueue.main.async {
                         self?.presenter.presentChangeTeam(Model.ChangeTeam.Response(teamID: request.teamID, user: user))
                     }

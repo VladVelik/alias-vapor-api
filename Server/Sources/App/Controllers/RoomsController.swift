@@ -10,8 +10,8 @@ import Vapor
 
 struct GamePair: Decodable, Encodable, Content {
     var words: [String]
-    var team_1: Team
-    var team_2: Team
+    var team_1_id: String
+    var team_2_id: String
 }
 
 struct RoomsController: RouteCollection {
@@ -37,6 +37,7 @@ struct RoomsController: RouteCollection {
         protected.get("allUsersOfEachTeam", ":room_id", use: getAllUsersOfAllTeams)
         protected.get("points", ":room_id", use: getPointsOfRoom)
         protected.get("settings", ":room_id", use: getInvCodeAndCountOfTeams)
+        protected.put("makePrivate", ":room_id", use: makeRoomPrivateHandler)
     }
     
     // MARK: - ENTER ROOM (POST Request /rooms/enter route)
@@ -65,6 +66,7 @@ struct RoomsController: RouteCollection {
         
         guard let room = try await Room.query(on: req.db)
             .filter(\.$invitation_code == context.invitation_code)
+            .filter(\.$is_private == true)
             .first()
         else {
             throw Abort(.notFound)
@@ -82,6 +84,18 @@ struct RoomsController: RouteCollection {
         guard let room = try? req.content.decode(Room.self) else {
             throw Abort(.custom(code: 499, reasonPhrase: "Decode Failed"))
         }
+        
+        if room.is_private == true {
+            let already_room = try await Room.query(on: req.db)
+                .filter(\.$is_private == true)
+                .filter(\.$invitation_code == room.invitation_code)
+                .first()
+            
+            if already_room != nil {
+                throw Abort(.notFound)
+            }
+        }
+        
         try await room.save(on: req.db)
         
         let participant = Participant(userID: auth_user.id!, roomID: room.id!, role: "admin")
@@ -90,8 +104,48 @@ struct RoomsController: RouteCollection {
         return room
     }
     
+    //MARK: - MAKE ROOM PRIVATE (PUT Request /rooms/makePrivate/roomID route)
+    func makeRoomPrivateHandler(req: Request) async throws -> HTTPStatus {
+        guard let room = try await Room.find(req.parameters.get("room_id"), on: req.db) else {
+            throw Abort(.notFound)
+        }
+        
+        struct Context: Content {
+            var invitation_code: String
+        }
+        
+        let cntxt = try req.content.decode(Context.self)
+        
+        let already_room = try await Room.query(on: req.db)
+            .filter(\.$is_private == true)
+            .filter(\.$invitation_code == room.invitation_code)
+            .first()
+        
+        if already_room != nil {
+            return .badRequest
+        }
+        
+        let auth_user = try req.auth.require(User.self)
+        
+        guard let participant = try await Participant.query(on: req.db)
+            .filter(\.$userID == auth_user.id!)
+            .filter(\.$role == "admin")
+            .first()
+        else {
+            throw Abort(.notFound)
+        }
+        
+//        let newRoom = Room(id: room.id, is_private: true, invitation_code: cntxt.invitation_code, received_points: room.received_points, game_status: room.game_status)
+        room.is_private = true
+        room.invitation_code = cntxt.invitation_code
+        try await room.save(on: req.db)
+//        try await newRoom.save(on: req.db)
+        
+        return .ok
+    }
+    
     // MARK: - START GAME (PUT Request /rooms/startGame/roomID route)
-    func startGameHandler(req: Request) async throws -> [GamePair] {
+    func startGameHandler(req: Request) async throws -> GamePair {
         guard let room = try await Room.find(req.parameters.get("room_id"), on: req.db) else {
             throw Abort(.notFound)
         }
@@ -114,12 +168,12 @@ struct RoomsController: RouteCollection {
             throw Abort(.badRequest)
         }
         
-        var pairs: [GamePair] = []
+        var pairs: GamePair?
         
         for i in 0..<teams.count {
             for j in i+1..<teams.count {
                 if teams[i].id != teams[j].id {
-                    pairs.append(GamePair(words: self.words.randomSample(count: 4), team_1: teams[i], team_2: teams[j]))
+                    pairs = GamePair(words: self.words.randomSample(count: 4), team_1_id: String(teams[i].id!), team_2_id: String(teams[j].id!))
                 }
             }
         }
@@ -129,7 +183,7 @@ struct RoomsController: RouteCollection {
 
         room.game_status = true
         try await room.save(on: req.db)
-        return pairs
+        return pairs!
     }
     
     // MARK: - PAUSE GAME (PUT Request /rooms/pauseGame/roomID route)
@@ -266,8 +320,16 @@ struct RoomsController: RouteCollection {
         return users
     }
     
+    struct UserOnSteroids: Content {
+        var id: UUID?
+        var username: String
+        var email: String
+        var login_status: Bool?
+        var role: String
+    }
+    
     // MARK: - GET ALL USERS OF EACH TEAMS (GET Request /rooms/allUsersOfEachTeam/roomID route)
-    func getAllUsersOfAllTeams(req: Request) async throws -> [String: [User.Public]] {
+    func getAllUsersOfAllTeams(req: Request) async throws -> [String: [UserOnSteroids]] {
         guard let room = try await Room.find(req.parameters.get("room_id"), on: req.db) else {
             throw Abort(.notFound)
         }
@@ -276,16 +338,16 @@ struct RoomsController: RouteCollection {
             .filter(\.$roomID == room.id!)
             .all()
         
-        var result: [String: [User.Public]] = [:]
+        var result: [String: [UserOnSteroids]] = [:]
         
         for t in teams {
             let participants = try await Participant.query(on: req.db)
                 .filter(\.$teamID == t.id)
                 .all()
-            var users: [User.Public] = []
+            var users: [UserOnSteroids] = []
             for i in participants {
                 var user = try await User.query(on: req.db).filter(\.$id == i.userID).first()
-                users.append((user?.converToPublic())!)
+                users.append(UserOnSteroids(id: (user?.converToPublic())!.id, username: (user?.converToPublic())!.username, email: (user?.converToPublic())!.email, login_status: (user?.converToPublic())!.login_status, role: i.role))
 //                users[i.role] = (user?.converToPublic())!
             }
             if users.isEmpty {
@@ -301,10 +363,10 @@ struct RoomsController: RouteCollection {
             .all()
         
         
-        var users: [User.Public] = []
+        var users: [UserOnSteroids] = []
         for i in room_participants {
             var user = try await User.query(on: req.db).filter(\.$id == i.userID).first()
-            users.append((user?.converToPublic())!)
+            users.append(UserOnSteroids(id: (user?.converToPublic())!.id, username: (user?.converToPublic())!.username, email: (user?.converToPublic())!.email, login_status: (user?.converToPublic())!.login_status, role: i.role))
 //            users[i.role] = (user?.converToPublic())!
         }
         
@@ -322,8 +384,14 @@ struct RoomsController: RouteCollection {
         return room.received_points
     }
     
+    struct RoomOnSteroids: Content {
+        var teams_count: Int
+        var invitation_code: String
+        var is_private: Bool
+    }
+    
     // MARK: - GET INV.CODE & COUNT OF TEAMS OF ROOM (GET Request /rooms/settings/roomID route)
-    func getInvCodeAndCountOfTeams(req: Request) async throws -> [String: Int] {
+    func getInvCodeAndCountOfTeams(req: Request) async throws -> RoomOnSteroids {
         guard let room = try await Room.find(req.parameters.get("room_id"), on: req.db) else {
             throw Abort(.notFound)
         }
@@ -332,14 +400,14 @@ struct RoomsController: RouteCollection {
             .filter(\.$roomID == room.id!)
             .all()
         
-        var result: [String: Int] = [:]
+        var result: RoomOnSteroids?
         
         if let code = room.invitation_code {
-            result = [code: teams.count]
+            result = RoomOnSteroids(teams_count: teams.count, invitation_code: code, is_private: room.is_private)
         } else {
-            result = ["": teams.count]
+            result = RoomOnSteroids(teams_count: teams.count, invitation_code: "", is_private: room.is_private)
         }
         
-        return result
+        return result!
     }
 }
