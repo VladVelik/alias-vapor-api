@@ -20,6 +20,6 @@ final class GameRoomRouter: GameRoomRoutingLogic {
     }
     
     func goBack() {
-        view?.navigationController?.popViewController(animated: true)
+        view?.navigationController?.pushViewController(MainMenuAssembly.build(), animated: true)
     }
 }

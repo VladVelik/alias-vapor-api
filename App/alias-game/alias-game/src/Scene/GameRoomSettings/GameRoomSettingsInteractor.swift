@@ -48,8 +48,9 @@ final class GameRoomSettingsInteractor: GameRoomSettingsBusinessLogic {
                         invCode = code
                         teamCount = count
                     }
-                    
-                    self?.presenter.presentStart(Model.Start.Response(teamCount: teamCount, invCode: invCode))
+                    DispatchQueue.main.async {
+                        self?.presenter.presentStart(Model.Start.Response(teamCount: teamCount, invCode: invCode))
+                    }
                 } catch _ {
                     print("fetch data error or no room was found")
                 }
@@ -63,7 +64,7 @@ final class GameRoomSettingsInteractor: GameRoomSettingsBusinessLogic {
             let loginData = loginString.data(using: String.Encoding.utf8)!
             let base64LoginString = loginData.base64EncodedString()
             
-            guard let url = URL(string: "http://127.0.0.1:8080/teams/fewCreate/\(User.shared.roomID)") else {
+            guard let url = URL(string: "http://127.0.0.1:8080/teams/fewTeams/\(User.shared.roomID)") else {
                 return
             }
             var req = URLRequest(url: url)
@@ -72,7 +73,7 @@ final class GameRoomSettingsInteractor: GameRoomSettingsBusinessLogic {
             req.setValue("Basic \(base64LoginString)", forHTTPHeaderField: "Authorization")
             req.httpMethod = "POST"
             let parameters: [String: Any] = [
-                "countOfTeams": request
+                "countOfTeams": request.newCount-request.oldCount
             ]
             let jsonData = try? JSONSerialization.data(withJSONObject: parameters)
             req.httpBody = jsonData
@@ -82,7 +83,9 @@ final class GameRoomSettingsInteractor: GameRoomSettingsBusinessLogic {
                 }
                 if let data = data {
                     do {
-                        self?.presenter.presentGameRoom(Model.PushGameRoom.Response())
+                        DispatchQueue.main.async {
+                            self?.presenter.presentGameRoom(Model.PushGameRoom.Response())
+                        }
                     } catch _ {
                         print("fetch data error or no room was found")
                     }
@@ -93,16 +96,16 @@ final class GameRoomSettingsInteractor: GameRoomSettingsBusinessLogic {
             let loginData = loginString.data(using: String.Encoding.utf8)!
             let base64LoginString = loginData.base64EncodedString()
             
-            guard let url = URL(string: "http://127.0.0.1:8080/teams/\(User.shared.roomID)") else {
+            guard let url = URL(string: "http://127.0.0.1:8080/teams/delete/\(User.shared.roomID)") else {
                 return
             }
             var req = URLRequest(url: url)
             req.setValue("application/json", forHTTPHeaderField: "Content-Type")
             req.setValue("*/*", forHTTPHeaderField: "Accept")
             req.setValue("Basic \(base64LoginString)", forHTTPHeaderField: "Authorization")
-            req.httpMethod = "DEL"
+            req.httpMethod = "DELETE"
             let parameters: [String: Any] = [
-                "countOfTeams": request
+                "countOfTeams": request.newCount
             ]
             let jsonData = try? JSONSerialization.data(withJSONObject: parameters)
             req.httpBody = jsonData
@@ -110,14 +113,18 @@ final class GameRoomSettingsInteractor: GameRoomSettingsBusinessLogic {
                 if error != nil {
                     return
                 }
-                if let data = data {
-                    do {
+                do {
+                    DispatchQueue.main.async {
                         self?.presenter.presentGameRoom(Model.PushGameRoom.Response())
-                    } catch _ {
-                        print("fetch data error or no room was found")
                     }
+                } catch _ {
+                    print("fetch data error or no room was found")
                 }
             }.resume()
+        } else {
+            DispatchQueue.main.async {
+                self.presenter.presentGameRoom(Model.PushGameRoom.Response())
+            }
         }
     }
     
@@ -133,7 +140,7 @@ final class GameRoomSettingsInteractor: GameRoomSettingsBusinessLogic {
         req.setValue("application/json", forHTTPHeaderField: "Content-Type")
         req.setValue("*/*", forHTTPHeaderField: "Accept")
         req.setValue("Basic \(base64LoginString)", forHTTPHeaderField: "Authorization")
-        req.httpMethod = "DEL"
+        req.httpMethod = "DELETE"
         
         let _ = URLSession.shared.dataTask(with: req) { [weak self] (data, response, error) in
             if error != nil {
@@ -141,7 +148,9 @@ final class GameRoomSettingsInteractor: GameRoomSettingsBusinessLogic {
             }
             if let data = data {
                 do {
-                    self?.presenter.presentMainMenu(Model.DeleteGameRoom.Response())
+                    DispatchQueue.main.async {
+                        self?.presenter.presentMainMenu(Model.DeleteGameRoom.Response())
+                    }
                 } catch _ {
                     print("fetch data error or no room was found")
                 }

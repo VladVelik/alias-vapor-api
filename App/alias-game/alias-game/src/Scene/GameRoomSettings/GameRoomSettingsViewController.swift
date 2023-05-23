@@ -75,12 +75,11 @@ final class GameRoomSettingsViewController: UIViewController {
         // Configure team count stepper
         teamCountStepper.minimumValue = 2
         teamCountStepper.maximumValue = 10
-        teamCountStepper.value = 2
+        teamCountStepper.value = Double(teamCount)
         teamCountStepper.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(teamCountStepper)
         
         // Configure code label
-        codeLabel.text = "Sample Code"
         codeLabel.isUserInteractionEnabled = true
         codeLabel.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(codeLabel)
@@ -153,7 +152,7 @@ final class GameRoomSettingsViewController: UIViewController {
 extension GameRoomSettingsViewController: GameRoomSettingsDisplayLogic {
     func displayStart(_ viewModel: Model.Start.ViewModel) {
         oldTeamCount = viewModel.teamCount
-        teamCount = min(viewModel.teamCount, 2)
+        teamCount = viewModel.teamCount
         codeLabel.text = viewModel.invCode
         if viewModel.invCode.isEmpty {
             codeLabel.text = "У данной комнаты нет кода"

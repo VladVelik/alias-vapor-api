@@ -54,11 +54,14 @@ final class GameRoomViewController: UIViewController {
         view.backgroundColor = .white
         self.title = "Game Room"
         
+        self.navigationController?.isNavigationBarHidden = false
         setupNavigationBar()
         if User.shared.role == "admin" {
             setupGameControlButtons()
         }
         setupTableView()
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleTableViewTap))
+        tableView.addGestureRecognizer(tapGesture)
     }
     
     private func setupNavigationBar() {
@@ -105,8 +108,16 @@ final class GameRoomViewController: UIViewController {
         
         view.addSubview(tableView)
         
+        if User.shared.role == "admin" {
+            NSLayoutConstraint.activate([
+                tableView.topAnchor.constraint(equalTo: startButton.bottomAnchor, constant: 10)])
+        } else {
+            NSLayoutConstraint.activate([
+                tableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor)])
+        }
+        
+        
         NSLayoutConstraint.activate([
-            tableView.topAnchor.constraint(equalTo: startButton.bottomAnchor, constant: 10),
             tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
@@ -172,6 +183,30 @@ final class GameRoomViewController: UIViewController {
     private func editPointsTapped(sender: UIButton) {
         interactor.loadCurrentPointsOfRoom(Model.CurrentRoomPoints.Request())
     }
+    
+    @objc func handleTableViewTap(gesture: UITapGestureRecognizer) {
+        let location = gesture.location(in: tableView)
+        let path = tableView.indexPathForRow(at: location)
+        
+        // If there is no cell at the tapped location, handle the tap as a tap in an empty section
+        if path == nil {
+            // Определяем секцию, в которую тапнул пользователь
+            for section in 0..<tableView.numberOfSections {
+                let sectionRect = tableView.rect(forSection: section)
+                if sectionRect.contains(location) {
+                    print("Tap in empty section \(section)")
+                    if section < teams.count {
+                        let teamID = teams[section].id
+                        print("tap on team")
+                        interactor.changeTeam(Model.ChangeTeam.Request(teamID: teamID))
+                    } else {
+                        print("move to Unassigned")
+                    }
+                    break
+                }
+            }
+        }
+    }
 }
 
 // MARK: - TableView
@@ -185,16 +220,13 @@ extension GameRoomViewController: UITableViewDelegate, UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
-        return section < teams.count ? "Team \(section)" : "Unassigned"
+        return section < teams.count ? "Team \(section+1)" : "Unassigned"
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let user = indexPath.section < teams.count ? teams[indexPath.section].members[indexPath.row] : participants[indexPath.row]
         let cell = tableView.dequeueReusableCell(withIdentifier: "PlayerCell", for: indexPath) as! PlayerCell
         cell.name = user.username
-        if User.shared.username == user.username {
-            cell.tintColor = .blue
-        }
         cell.upArrowButton.accessibilityIdentifier = user.id
         cell.crossButton.accessibilityIdentifier = user.id
         cell.upArrowButton.addTarget(self, action: #selector(handleUpArrowButton), for: .touchUpInside)
@@ -205,12 +237,11 @@ extension GameRoomViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         if indexPath.section < teams.count {
             let teamID = teams[indexPath.section].id
+            print("tap on team")
             interactor.changeTeam(Model.ChangeTeam.Request(teamID: teamID))
         } else {
             print("move to Unassigned")
         }
-        
-        tableView.reloadData()
     }
     
     func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
@@ -235,6 +266,11 @@ class PlayerCell: UITableViewCell {
     var name: String = "" {
         didSet {
             textLabel?.text = name
+            if User.shared.username != name {
+                addButtons()
+            } else {
+                textLabel?.textColor = .blue
+            }
         }
     }
     
@@ -262,8 +298,7 @@ class PlayerCell: UITableViewCell {
         return button
     }()
     
-    override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
-        super.init(style: style, reuseIdentifier: reuseIdentifier)
+    private func addButtons() {
         if User.shared.role == "admin" {
             let buttonStack = UIStackView(arrangedSubviews: [upArrowButton, crossButton])
             buttonStack.axis = .horizontal
@@ -282,6 +317,10 @@ class PlayerCell: UITableViewCell {
         }
     }
     
+    override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
+        super.init(style: style, reuseIdentifier: reuseIdentifier)
+    }
+    
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
@@ -290,14 +329,36 @@ class PlayerCell: UITableViewCell {
 // MARK: - DisplayLogic
 extension GameRoomViewController: GameRoomDisplayLogic {
     func displayStart(_ viewModel: Model.Start.ViewModel) {
+        let currentUserID = User.shared.id
+        var isInRoom = false
+        
         participants = viewModel.usersWithoutTeam
-        var counter = 1
-        for (teamID, users) in viewModel.usersOfTeams {
-            teams.append(Model.Team(id: teamID, members: users, points: 0))
-            counter += 1
+        for participant in participants {
+            if participant.id == currentUserID {
+                isInRoom = true
+                break
+            }
         }
         
-        self.configureUI()
+        for (teamID, users) in viewModel.usersOfTeams {
+            teams.append(Model.Team(id: teamID, members: users, points: 0))
+            if !isInRoom {
+                for user in users {
+                    if user.id == currentUserID {
+                        isInRoom = true
+                        break
+                    }
+                }
+            }
+        }
+        
+        teams.sort { $0.id < $1.id }
+        
+        if isInRoom {
+            self.configureUI()
+        } else {
+            router.goBack()
+        }
     }
     
     func displayGameRoomSettings(_ viewModel: Model.Settings.ViewModel) {
@@ -335,7 +396,7 @@ extension GameRoomViewController: GameRoomDisplayLogic {
         
         let user = viewModel.user
         let teamID = viewModel.teamID
-
+        
         if let teamIndex = teams.firstIndex(where: { $0.id == teamID }) {
             teams[teamIndex].members.append(user)
         }

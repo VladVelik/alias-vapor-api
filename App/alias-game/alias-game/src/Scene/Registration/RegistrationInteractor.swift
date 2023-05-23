@@ -61,9 +61,9 @@ extension RegistrationInteractor: RegistrationBusinessLogic {
             if let data = data {
                 do {
                     let object = try JSONDecoder().decode(Model.User.self, from: data)
-                    User.shared.username = request.username
-                    User.shared.password = request.password
                     User.shared.id = object.id
+                    User.shared.username = object.username
+                    User.shared.password = request.password
                     DispatchQueue.main.async {
                         self?.presenter.presentMainMenu(Model.MainMenu.Response())
                     }

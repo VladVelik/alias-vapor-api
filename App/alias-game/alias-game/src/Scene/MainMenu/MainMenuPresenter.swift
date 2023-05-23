@@ -39,7 +39,7 @@ extension MainMenuPresenter: MainMenuPresentationLogic {
     }
     
     func presentOpenRooms(_ response: Model.OpenRooms.Response) {
-        view?.displayOpenRooms(Model.OpenRooms.ViewModel(/**open_rooms: response.open_rooms)*/))
+        view?.displayOpenRooms(Model.OpenRooms.ViewModel(open_rooms: response.open_rooms))
     }
     
     func presentCreateRoomAlert(_ response: Model.CreateRoomAlert.Response) {

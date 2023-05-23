@@ -54,6 +54,7 @@ final class GameRoomInteractor: GameRoomBusinessLogic {
                 let decoder = JSONDecoder()
                 do {
                     let groupedUsers = try decoder.decode([String:[Model.User]].self, from: data)
+                    
                     var usersWithoutTeam: [Model.User] = []
                     var usersOfTeams: [String: [Model.User]] = [:]
                     
@@ -64,8 +65,9 @@ final class GameRoomInteractor: GameRoomBusinessLogic {
                             usersOfTeams[key] = value
                         }
                     }
-                    
-                    self.presenter.presentStart(Model.Start.Response(usersWithoutTeam: usersWithoutTeam, usersOfTeams: usersOfTeams))
+                    DispatchQueue.main.async {
+                        self.presenter.presentStart(Model.Start.Response(usersWithoutTeam: usersWithoutTeam, usersOfTeams: usersOfTeams))
+                    }
                 } catch {
                     print("Error decoding JSON: \(error)")
                 }
@@ -81,7 +83,32 @@ final class GameRoomInteractor: GameRoomBusinessLogic {
     }
     
     func goBack(_ request: Model.GoBack.Request) {
-        presenter.presentBackScreen(Model.GoBack.Response())
+        let loginString = String(format: "%@:%@", User.shared.username, User.shared.password)
+        let loginData = loginString.data(using: String.Encoding.utf8)!
+        let base64LoginString = loginData.base64EncodedString()
+
+        guard let url = URL(string: "http://127.0.0.1:8080/participants/fromRoom/\(User.shared.id)") else {
+            return
+        }
+        var req = URLRequest(url: url)
+        req.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        req.setValue("*/*", forHTTPHeaderField: "Accept")
+        req.setValue("Basic \(base64LoginString)", forHTTPHeaderField: "Authorization")
+        req.httpMethod = "DELETE"
+        let _ = URLSession.shared.dataTask(with: req) { [weak self] (data, response, error) in
+            if error != nil {
+                return
+            }
+            if let data = data {
+                do {
+                    DispatchQueue.main.async {
+                        self?.presenter.presentBackScreen(Model.GoBack.Response())
+                    }
+                } catch _ {
+                    print("fetch data error or no room was found")
+                }
+            }
+        }.resume()
     }
     
     func loadCurrentPointsOfRoom(_ request: Model.CurrentRoomPoints.Request) {
@@ -105,7 +132,9 @@ final class GameRoomInteractor: GameRoomBusinessLogic {
             if let data = data {
                 do {
                     let currentPoints = try JSONDecoder().decode(Int.self, from: data)
-                    self?.presenter.presentEditPoints(Model.CurrentRoomPoints.Response(current: currentPoints))
+                    DispatchQueue.main.async {
+                        self?.presenter.presentEditPoints(Model.CurrentRoomPoints.Response(current: currentPoints))
+                    }
                 } catch _ {
                     print("fetch data error or no room was found")
                 }
@@ -194,14 +223,16 @@ final class GameRoomInteractor: GameRoomBusinessLogic {
         req.setValue("application/json", forHTTPHeaderField: "Content-Type")
         req.setValue("*/*", forHTTPHeaderField: "Accept")
         req.setValue("Basic \(base64LoginString)", forHTTPHeaderField: "Authorization")
-        req.httpMethod = "DEL"
+        req.httpMethod = "DELETE"
         let _ = URLSession.shared.dataTask(with: req) { [weak self] (data, response, error) in
             if error != nil {
                 return
             }
             if let data = data {
                 do {
-                    self?.presenter.presentDeletionFromRoom(Model.DeleteFromRoom.Response(participant_id: request.participant_id))
+                    DispatchQueue.main.async {
+                        self?.presenter.presentDeletionFromRoom(Model.DeleteFromRoom.Response(participant_id: request.participant_id))
+                    }
                 } catch _ {
                     print("fetch data error or no room was found")
                 }
@@ -319,7 +350,9 @@ final class GameRoomInteractor: GameRoomBusinessLogic {
             if let data = data {
                 do {
                     let user = Model.User(id: User.shared.id, username: User.shared.username, email: "", login_status: true)
-                    self?.presenter.presentChangeTeam(Model.ChangeTeam.Response(teamID: request.teamID, user: user))
+                    DispatchQueue.main.async {
+                        self?.presenter.presentChangeTeam(Model.ChangeTeam.Response(teamID: request.teamID, user: user))
+                    }
                 } catch _ {
                     print("fetch data error or no room was found")
                 }
