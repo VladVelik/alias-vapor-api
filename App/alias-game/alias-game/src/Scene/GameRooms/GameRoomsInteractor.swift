@@ -62,6 +62,7 @@ extension GameRoomsInteractor: GameRoomsBusinessLogic {
     }
     
     func loadRoom(_ request: Model.RoomI.Request) {
+        User.shared.roomID = request.id
         presenter.presentRoom(Model.RoomI.Response())
     }
     

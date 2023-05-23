@@ -20,7 +20,7 @@ final class GameRoomsRouter {
 // MARK: - RoutingLogic
 extension GameRoomsRouter: GameRoomsRoutingLogic {
     func routeToRoom() {
-        // Nikt Y
+        view?.navigationController?.pushViewController(GameRoomAssembly.build(), animated: true)
     }
     
     func routeToMainMenu() {
