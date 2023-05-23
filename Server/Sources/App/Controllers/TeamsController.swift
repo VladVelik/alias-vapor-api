@@ -20,7 +20,8 @@ struct TeamsController: RouteCollection {
         protected.get(":room_id", use: getAllTeamsOfRoomHandler)
         protected.get("users", ":team_id", use: getUsersOfTeamHandler)
         protected.put("addPoints", ":team_id", use: addPointsHandler)
-        protected.delete(":room_id", use: deleteTeamsHandler)
+        protected.delete("delete", ":room_id", use: deleteTeamsHandler)
+        protected.post("fewTeams", ":room_id", use: createFewTeamsHandler)
     }
     
     // MARK: - ENTER A TEAM (PUT Request /teams/enter route)
@@ -45,7 +46,7 @@ struct TeamsController: RouteCollection {
         return participant
     }
     
-    //MARK: - CREATE TEAM (POST Request /teams/create route)
+    // MARK: - CREATE TEAM (POST Request /teams/create route)
     func createTeamHandler(req: Request) async throws -> Team {
         guard let team = try? req.content.decode(Team.self) else {
             throw Abort(.custom(code: 499, reasonPhrase: "Decode Failed"))
@@ -62,6 +63,33 @@ struct TeamsController: RouteCollection {
         
         try await team.save(on: req.db)
         return team
+    }
+    
+    // MARK: - CREATE FEW TEAMS (POST Request /teams/fewCreate/roomID route)
+    func createFewTeamsHandler(req: Request) async throws -> [String] {
+        struct Context: Content {
+            var countOfTeams: Int
+        }
+        
+        let countOfTeams = try req.content.decode(Context.self)
+        
+        let auth_user = try req.auth.require(User.self)
+        guard let participant_admin = try await Participant.query(on: req.db)
+            .filter(\.$userID == auth_user.id!)
+            .filter(\.$role == "admin")
+            .first()
+        else {
+            throw Abort(.notFound)
+        }
+        
+        var teams: [String] = []
+        
+        for _ in 0..<countOfTeams.countOfTeams {
+            let team = Team(roomID: UUID(req.parameters.get("room_id")!)!, name: "", points: 0)
+            try await team.save(on: req.db)
+            teams.append(String(team.id!))
+        }
+        return teams
     }
     
     // MARK: - GET ALL TEAMS OF ROOM (GET Request /teams/roomID route)
@@ -109,11 +137,17 @@ struct TeamsController: RouteCollection {
         return .ok
     }
     
-    //MARK: - DELETE ALL TEAMS OF ROOM (DELETE Request /teams/room_id route)
+    // MARK: - DELETE ALL TEAMS OF ROOM (DELETE Request /teams/room_id route)
     func deleteTeamsHandler(req: Request) async throws -> HTTPStatus {
         guard let room = try await Room.find(req.parameters.get("room_id"), on: req.db) else {
             throw Abort(.notFound)
         }
+        
+        struct Context: Content {
+            var countOfTeams: Int
+        }
+        
+        let countOfTeams = try req.content.decode(Context.self)
         
         let auth_user = try req.auth.require(User.self)
         
@@ -144,9 +178,14 @@ struct TeamsController: RouteCollection {
             for i in 0..<usr_id.count {
                 try await Participant(userID: usr_id[i], roomID: room.id!, role: role[i]).save(on: req.db)
             }
-            return .ok
         } else {
             return .badRequest
         }
+        
+        for _ in 0..<countOfTeams.countOfTeams {
+            let team = Team(roomID: UUID(req.parameters.get("room_id")!)!, name: "", points: 0)
+            try await team.save(on: req.db)
+        }
+        return .ok
     }
 }

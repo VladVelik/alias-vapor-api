@@ -87,7 +87,7 @@ final class GameRoomInteractor: GameRoomBusinessLogic {
         let loginData = loginString.data(using: String.Encoding.utf8)!
         let base64LoginString = loginData.base64EncodedString()
 
-        guard let url = URL(string: "http://127.0.0.1:8080/participants/fromRoom/\(User.shared.id)") else {
+        guard let url = URL(string: "http://127.0.0.1:8080/participants/fromRoomSelf/\(User.shared.id)") else {
             return
         }
         var req = URLRequest(url: url)
