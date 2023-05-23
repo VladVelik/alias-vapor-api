@@ -33,6 +33,10 @@ struct RoomsController: RouteCollection {
         protected.put("points", ":room_id", use: changePointsHandler)
         protected.delete(":room_id", use: deleteRoomHandler)
         protected.get("open", use: getOpenRoomsHandler)
+        protected.get("noTeamUsers", ":room_id", use: getAllUsersWithoutTeam)
+        protected.get("allUsersOfEachTeam", ":room_id", use: getAllUsersOfAllTeams)
+        protected.get("points", ":room_id", use: getPointsOfRoom)
+        protected.get("settings", ":room_id", use: getInvCodeAndCountOfTeams)
     }
     
     // MARK: - ENTER ROOM (POST Request /rooms/enter route)
@@ -194,14 +198,6 @@ struct RoomsController: RouteCollection {
             throw Abort(.notFound)
         }
         
-        guard let participant = try await Participant.query(on: req.db)
-            .filter(\.$userID == user.id!)
-            .filter(\.$role == "admin")
-            .first()
-        else {
-            throw Abort(.notFound)
-        }
-        
         room.received_points = points.points
         try await room.save(on: req.db)
         return room
@@ -227,9 +223,18 @@ struct RoomsController: RouteCollection {
             .filter(\.$roomID == room.id!)
             .all()
         
-        room_participants.forEach { i in
-            i.delete(on: req.db)
-        }
+        try await room_participants.delete(on: req.db)
+        
+//        room_participants.forEach { i in
+//            i.delete(on: req.db)
+//        }
+        
+        let teams = try await Team.query(on: req.db)
+            .filter(\.$roomID == room.id!)
+            .all()
+        
+        try await teams.delete(on: req.db)
+        
         try await room.delete(on: req.db)
         return .ok
     }
@@ -240,5 +245,101 @@ struct RoomsController: RouteCollection {
             .filter(\.$is_private == false)
             .all()
         return open_rooms
+    }
+    
+    // MARK: - GET ALL USERS WITHOUT TEAM (GET Request /rooms/noTeamUsers/roomID route)
+    func getAllUsersWithoutTeam(req: Request) async throws -> [User.Public] {
+        guard let room = try await Room.find(req.parameters.get("room_id"), on: req.db) else {
+            throw Abort(.notFound)
+        }
+        
+        let room_participants = try await Participant.query(on: req.db)
+            .filter(\.$roomID == room.id!)
+            .filter(\.$teamID == nil)
+            .all()
+        
+        var users: [User.Public] = []
+        for i in room_participants {
+            var user = try await User.query(on: req.db).filter(\.$id == i.userID).first()
+            users.append((user?.converToPublic())!)
+        }
+        return users
+    }
+    
+    // MARK: - GET ALL USERS OF EACH TEAMS (GET Request /rooms/allUsersOfEachTeam/roomID route)
+    func getAllUsersOfAllTeams(req: Request) async throws -> [String: [User.Public]] {
+        guard let room = try await Room.find(req.parameters.get("room_id"), on: req.db) else {
+            throw Abort(.notFound)
+        }
+        
+        let teams = try await Team.query(on: req.db)
+            .filter(\.$roomID == room.id!)
+            .all()
+        
+        var result: [String: [User.Public]] = [:]
+        
+        for t in teams {
+            let participants = try await Participant.query(on: req.db)
+                .filter(\.$teamID == t.id)
+                .all()
+            var users: [User.Public] = []
+            for i in participants {
+                var user = try await User.query(on: req.db).filter(\.$id == i.userID).first()
+                users.append((user?.converToPublic())!)
+//                users[i.role] = (user?.converToPublic())!
+            }
+            if users.isEmpty {
+                result[String(t.id!)] = []
+            } else {
+                result[String(t.id!)] = users
+            }
+        }
+        
+        let room_participants = try await Participant.query(on: req.db)
+            .filter(\.$roomID == room.id!)
+            .filter(\.$teamID == nil)
+            .all()
+        
+        
+        var users: [User.Public] = []
+        for i in room_participants {
+            var user = try await User.query(on: req.db).filter(\.$id == i.userID).first()
+            users.append((user?.converToPublic())!)
+//            users[i.role] = (user?.converToPublic())!
+        }
+        
+        result[""] = users
+        
+        return result
+    }
+    
+    // MARK: - GET POINTS OF ROOM (GET Request /rooms/points/roomID route)
+    func getPointsOfRoom(req: Request) async throws -> Int {
+        guard let room = try await Room.find(req.parameters.get("room_id"), on: req.db) else {
+            throw Abort(.notFound)
+        }
+        
+        return room.received_points
+    }
+    
+    // MARK: - GET INV.CODE & COUNT OF TEAMS OF ROOM (GET Request /rooms/settings/roomID route)
+    func getInvCodeAndCountOfTeams(req: Request) async throws -> [String: Int] {
+        guard let room = try await Room.find(req.parameters.get("room_id"), on: req.db) else {
+            throw Abort(.notFound)
+        }
+        
+        let teams = try await Team.query(on: req.db)
+            .filter(\.$roomID == room.id!)
+            .all()
+        
+        var result: [String: Int] = [:]
+        
+        if let code = room.invitation_code {
+            result = [code: teams.count]
+        } else {
+            result = ["": teams.count]
+        }
+        
+        return result
     }
 }

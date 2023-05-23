@@ -95,7 +95,9 @@ extension MainMenuInteractor: MainMenuBusinessLogic {
             if let data = data {
                 do {
                     let object = try JSONDecoder().decode([Model.Room].self, from: data)
-                    self?.presenter.presentOpenRooms(Model.OpenRooms.Response(open_rooms: Model.OpenRoomsList(open_rooms: object)))
+                    DispatchQueue.main.async {
+                        self?.presenter.presentOpenRooms(Model.OpenRooms.Response(open_rooms: Model.OpenRoomsList(open_rooms: object)))
+                    }
                     print("\(object)")
                 } catch _ {
                     print("fetch data error")
@@ -141,7 +143,11 @@ extension MainMenuInteractor: MainMenuBusinessLogic {
             if let data = data {
                 do {
                     let object = try JSONDecoder().decode(Model.Room.self, from: data)
-                    self?.presenter.presentPrivateRoom(Model.PrivateRoom.Response(room: object))
+                    User.shared.roomID = object.id ?? ""
+                    User.shared.role = "user"
+                    DispatchQueue.main.async {
+                        self?.presenter.presentPrivateRoom(Model.PrivateRoom.Response(room: object))
+                    }
                     print("\(object)")
                 } catch _ {
                     print("fetch data error or no room was found")
@@ -178,8 +184,11 @@ extension MainMenuInteractor: MainMenuBusinessLogic {
             if let data = data {
                 do {
                     let object = try JSONDecoder().decode(Model.Room.self, from: data)
-                    self?.presenter.presentCreatedRoom(Model.CreatedRoom.Response(room: object))
-                    print("\(object)")
+                    User.shared.roomID = object.id ?? ""
+                    User.shared.role = "admin"
+                    DispatchQueue.main.async {
+                        self?.presenter.presentCreatedRoom(Model.CreatedRoom.Response(room: object))
+                    }
                 } catch _ {
                     print("fetch data error or no room was found")
                 }

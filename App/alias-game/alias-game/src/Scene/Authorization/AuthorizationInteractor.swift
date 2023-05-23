@@ -64,6 +64,7 @@ extension AuthorizationInteractor: AuthorizationBusinessLogic {
             if let data = data {
                 do {
                     let object = try JSONDecoder().decode(Model.User.self, from: data)
+                    User.shared.id = object.id
                     User.shared.username = request.username
                     User.shared.password = request.password
                     DispatchQueue.main.async {

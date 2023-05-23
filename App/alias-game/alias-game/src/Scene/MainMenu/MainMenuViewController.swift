@@ -62,6 +62,7 @@ final class MainMenuViewController: UIViewController {
     // MARK: - Configuration
     private func configureUI() {
         self.view.backgroundColor = .systemYellow
+        self.navigationController?.isNavigationBarHidden = true
         configureMainMenuLabel()
         configureLogoutButton()
         configureSettingsButton()
