@@ -144,7 +144,7 @@ extension MainMenuInteractor: MainMenuBusinessLogic {
                 do {
                     let object = try JSONDecoder().decode(Model.Room.self, from: data)
                     User.shared.roomID = object.id ?? ""
-                    User.shared.role = "part"
+                    User.shared.role = "user"
                     DispatchQueue.main.async {
                         self?.presenter.presentPrivateRoom(Model.PrivateRoom.Response(room: object))
                     }

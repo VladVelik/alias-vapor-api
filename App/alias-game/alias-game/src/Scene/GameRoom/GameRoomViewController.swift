@@ -27,11 +27,12 @@ final class GameRoomViewController: UIViewController {
     
     var participants: [Model.User] = []
     var teams: [Model.Team] = []
+    var timer: Timer?
     var tableView: UITableView!
     var startButton: UIButton!
     var pauseButton: UIButton!
     var continueButton: UIButton!
-    var pointsButton: UIButton!
+    var settingsButton: UIButton!
     
     init(router: GameRoomRoutingLogic, interactor: GameRoomBusinessLogic) {
         self.router = router
@@ -46,7 +47,15 @@ final class GameRoomViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        interactor.loadStart(Model.Start.Request())
+        self.interactor.loadStart(Model.Start.Request())
+        timer = Timer.scheduledTimer(withTimeInterval: 2.0, repeats: true) { (timer) in
+            self.interactor.loadStart(Model.Start.Request())
+        }
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        timer?.invalidate()
+        timer = nil
     }
     
     // MARK: - Configuration
@@ -66,7 +75,8 @@ final class GameRoomViewController: UIViewController {
     
     private func setupNavigationBar() {
         navigationItem.leftBarButtonItem = UIBarButtonItem(title: "Back", style: .plain, target: self, action: #selector(backTapped))
-        self.navigationItem.rightBarButtonItem = UIBarButtonItem(image: UIImage(systemName: "gearshape"), style: .plain, target: self, action: #selector(settingsTapped))
+//        self.navigationItem.rightBarButtonItem = UIBarButtonItem(image: UIImage(systemName: "gearshape"), style: .plain, target: self, action: #selector(settingsTapped))
+        self.navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Edit Points", style: .plain, target: self, action: #selector(editPointsTapped))
     }
     
     func setupGameControlButtons() {
@@ -80,11 +90,11 @@ final class GameRoomViewController: UIViewController {
         continueButton = UIButton(type: .system)
         continueButton.setTitle("Continue", for: .normal)
         
-        pointsButton = UIButton(type: .system)
-        pointsButton.setTitle("Edit Points", for: .normal)
-        pointsButton.addTarget(self, action: #selector(editPointsTapped), for: .touchUpInside)
+        settingsButton = UIButton(type: .system)
+        settingsButton.setImage(UIImage(systemName: "gearshape"), for: .normal)
+        settingsButton.addTarget(self, action: #selector(settingsTapped), for: .touchUpInside)
         
-        let stackView = UIStackView(arrangedSubviews: [startButton, pauseButton, continueButton, pointsButton])
+        let stackView = UIStackView(arrangedSubviews: [startButton, pauseButton, continueButton, settingsButton])
         stackView.axis = .horizontal
         stackView.distribution = .fillEqually
         stackView.spacing = 7
@@ -333,12 +343,14 @@ extension GameRoomViewController: GameRoomDisplayLogic {
         var isInRoom = false
         
         participants = viewModel.usersWithoutTeam
+        teams.removeAll()
         for participant in participants {
             if participant.id == currentUserID {
                 isInRoom = true
                 break
             }
         }
+        
         
         for (teamID, users) in viewModel.usersOfTeams {
             teams.append(Model.Team(id: teamID, members: users, points: 0))

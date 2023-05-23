@@ -27,40 +27,32 @@ final class SettingsInteractor {
 // MARK: - BusinessLogic
 extension SettingsInteractor: SettingsBusinessLogic {
     func loadAuth(_ request: Model.Auth.Request) {
-        let generator = UIImpactFeedbackGenerator(style: .medium)
-        generator.impactOccurred()
-        
-        let loginString = String(format: "%@:%@", request.username, request.password)
+        let loginString = String(format: "%@:%@", User.shared.username, User.shared.password)
         let loginData = loginString.data(using: String.Encoding.utf8)!
         let base64LoginString = loginData.base64EncodedString()
-        
-        let userId = User.shared.id
-        
-        let urlString = "http://127.0.0.1:8080/users/\(userId)"
-        guard let url = URL(string: urlString) else {
-            print("Invalid URL")
+
+        guard let url = URL(string: "http://127.0.0.1:8080/users/\(User.shared.id)") else {
             return
         }
-        
-        var request = URLRequest(url: url)
-        request.setValue("Basic \(base64LoginString)", forHTTPHeaderField: "Authorization")
-        request.httpMethod = "DELETE"
-        
-        let task = URLSession.shared.dataTask(with: request) { (data, response, error) in
-            if let error = error {
-                print("Error: \(error)")
-            } else if let response = response as? HTTPURLResponse {
-                if response.statusCode == 200 {
-                    print("User account deleted successfully")
+        var req = URLRequest(url: url)
+        req.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        req.setValue("*/*", forHTTPHeaderField: "Accept")
+        req.setValue("Basic \(base64LoginString)", forHTTPHeaderField: "Authorization")
+        req.httpMethod = "DELETE"
+        let _ = URLSession.shared.dataTask(with: req) { [weak self] (data, response, error) in
+            if error != nil {
+                return
+            }
+            if let data = data {
+                do {
                     DispatchQueue.main.async {
-                        self.presenter.presentAuth(Model.Auth.Response())
+                        self?.presenter.presentAuth(Model.Auth.Response())
                     }
-                } else {
-                    print("Error: \(response.statusCode)")
+                } catch _ {
+                    print("fetch data error or no room was found")
                 }
             }
-        }
-        task.resume()
+        }.resume()
     }
     
     func loadStart(_ request: Model.Start.Request) {

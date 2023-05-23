@@ -198,14 +198,6 @@ struct RoomsController: RouteCollection {
             throw Abort(.notFound)
         }
         
-        guard let participant = try await Participant.query(on: req.db)
-            .filter(\.$userID == user.id!)
-            .filter(\.$role == "admin")
-            .first()
-        else {
-            throw Abort(.notFound)
-        }
-        
         room.received_points = points.points
         try await room.save(on: req.db)
         return room

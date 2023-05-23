@@ -62,7 +62,9 @@ final class GameRoomsViewController: UIViewController {
     // MARK: - Actions
     @objc
     private func buttonWasTapped(_ sender: UIButton) {
-        interactor.loadRoom(Model.RoomI.Request(id: sender.tag.description))
+        if let id = sender.accessibilityIdentifier {
+            interactor.loadRoom(Model.RoomI.Request(id: id))
+        }
     }
     
     // MARK: - Configuration
@@ -92,11 +94,11 @@ final class GameRoomsViewController: UIViewController {
         
         for i in 0..<openRoomsList.getNumberOfRooms() {
             let button = UIButton()
-            button.setTitle("\(openRoomsList.getID(i))", for: .normal)
+            button.setTitle("Комната \(openRoomsList.getID(i).prefix(4))", for: .normal)
             button.backgroundColor = .systemBlue
             button.layer.cornerRadius = 10
             button.setTitleColor(.white, for: .normal)
-            button.tag = i
+            button.accessibilityIdentifier = openRoomsList.getID(i)
             button.addTarget(self, action: #selector(self.buttonWasTapped(_:)), for: .touchUpInside)
             buttons.append(button)
             stackView.addArrangedSubview(button)
