@@ -346,6 +346,7 @@ extension GameRoomViewController: GameRoomDisplayLogic {
                 for user in users {
                     if user.id == currentUserID {
                         isInRoom = true
+//                        User.shared.role = user.key
                         break
                     }
                 }
@@ -376,9 +377,19 @@ extension GameRoomViewController: GameRoomDisplayLogic {
     func displayDeletionFromRoom(_ viewModel: Model.DeleteFromRoom.ViewModel) {
         let id = viewModel.participant_id
         
+//        for i in participants {
+//            if i.value.id == id {
+//                participants.removeValue(forKey: i.key)
+//            }
+//        }
         participants.removeAll(where: { $0.id == id })
         
         teams.indices.forEach { index in
+//            for i in teams[index].members {
+//                if i.value.id == id {
+//                    participants.removeValue(forKey: i.key)
+//                }
+//            }
             teams[index].members.removeAll(where: { $0.id == id })
         }
         
@@ -388,9 +399,20 @@ extension GameRoomViewController: GameRoomDisplayLogic {
     func displayChangingTeam(_ viewModel: Model.ChangeTeam.ViewModel) {
         let id = viewModel.user.id
         
+//        for i in participants {
+//            if i.value.id == id {
+//                participants.removeValue(forKey: i.key)
+//            }
+//        }
+        
         participants.removeAll(where: { $0.id == id })
         
         teams.indices.forEach { index in
+//            for i in teams[index].members {
+//                if i.value.id == id {
+//                    participants.removeValue(forKey: i.key)
+//                }
+//            }
             teams[index].members.removeAll(where: { $0.id == id })
         }
         

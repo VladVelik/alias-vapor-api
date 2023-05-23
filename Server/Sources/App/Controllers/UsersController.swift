@@ -16,7 +16,6 @@ struct UsersController: RouteCollection {
         let protected = usersGroup.grouped(basicMW, guardMW)
         
         protected.put("auth", use: updateLoginStatusHandler)
-        protected.delete(":user_id", use: deleteUserHandler)
         usersGroup.post("register", use: registerHandler)
     }
     
@@ -44,15 +43,5 @@ struct UsersController: RouteCollection {
         user.login_status = true
         try await user.save(on: req.db)
         return user.converToPublic()
-    }
-    
-    //MARK: DELETE USER (DELETE Request /users/*user_id* route)
-    func deleteUserHandler(req: Request) async throws -> HTTPStatus {
-        guard let user = try await User.find(req.parameters.get("user_id"), on: req.db) else {
-            throw Abort(.notFound)
-        }
-        
-        try await user.delete(on: req.db)
-        return .ok
     }
 }

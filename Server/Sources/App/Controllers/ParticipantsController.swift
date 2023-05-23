@@ -18,6 +18,7 @@ struct ParticipantsController: RouteCollection {
         protected.put("role", use: updateRoleHandler)
         protected.delete("fromTeam", ":user_id", use: deleteFromTeamHandler)
         protected.delete("fromRoom", ":user_id", use: deleteFromRoomHandler)
+        protected.delete("fromRoomSelf", ":user_id", use: deleteSelfFromRoomHandler)
     }
     
     // MARK: - CHANGE ROLE (PUT Request /participants/role route)
@@ -46,10 +47,16 @@ struct ParticipantsController: RouteCollection {
             throw Abort(.notFound)
         }
         
-        if participant.userID != auth_user.id {
-            participant.role = context.role
-            try await participant.save(on: req.db)
+        var usr_id = participant.userID
+        var room_id = participant.roomID
+        var team_id = participant.teamID
+        
+        try await participant.delete(on: req.db)
+    
+        if usr_id != auth_user.id {
+            try await Participant(userID: usr_id, roomID: room_id, teamID: team_id, role: context.role).save(on: req.db)
         }
+    
         return participant
     }
     
@@ -68,12 +75,14 @@ struct ParticipantsController: RouteCollection {
         else {
             throw Abort(.notFound)
         }
+        
         if user.id != auth_user.id {
             let participant = try await Participant.query(on: req.db)
                 .filter(\.$userID == user.id!)
                 .first()
-            participant!.teamID = nil
-            try await participant!.save(on: req.db)
+            var new_p = Participant(userID: participant!.userID, roomID: participant!.roomID, teamID: nil, role: participant!.role)
+            try await participant!.delete(on: req.db)
+            try await new_p.save(on: req.db)
             return .ok
         } else {
             return .badRequest
@@ -104,5 +113,18 @@ struct ParticipantsController: RouteCollection {
         } else {
             return .badRequest
         }
+    }
+    
+    //MARK: DELETE PARTICIPANT FROM ROOM (HIMSELF) (DELETE Request /participants/fromRoomSelf/id route)
+    func deleteSelfFromRoomHandler(req: Request) async throws -> HTTPStatus {
+        guard let user = try await User.find(req.parameters.get("user_id"), on: req.db) else {
+            throw Abort(.notFound)
+        }
+        
+        let participant = try await Participant.query(on: req.db)
+            .filter(\.$userID == user.id!)
+            .first()
+        try await participant!.delete(on: req.db)
+        return .ok
     }
 }
