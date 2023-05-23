@@ -146,13 +146,14 @@ final class GameRoomSettingsInteractor: GameRoomSettingsBusinessLogic {
             if error != nil {
                 return
             }
-            if let data = data {
-                do {
+            if let response = response as? HTTPURLResponse {
+                if response.statusCode == 200 {
+                    print("User account deleted successfully")
                     DispatchQueue.main.async {
                         self?.presenter.presentMainMenu(Model.DeleteGameRoom.Response())
                     }
-                } catch _ {
-                    print("fetch data error or no room was found")
+                } else {
+                    print("Error: \(response.statusCode)")
                 }
             }
         }.resume()

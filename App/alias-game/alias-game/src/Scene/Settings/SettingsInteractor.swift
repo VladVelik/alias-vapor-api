@@ -52,13 +52,15 @@ extension SettingsInteractor: SettingsBusinessLogic {
             } else if let response = response as? HTTPURLResponse {
                 if response.statusCode == 200 {
                     print("User account deleted successfully")
+                    DispatchQueue.main.async {
+                        self.presenter.presentAuth(Model.Auth.Response())
+                    }
                 } else {
                     print("Error: \(response.statusCode)")
                 }
             }
         }
         task.resume()
-        presenter.presentAuth(Model.Auth.Response())
     }
     
     func loadStart(_ request: Model.Start.Request) {
