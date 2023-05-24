@@ -61,6 +61,8 @@ Room - .../participants/fromRoom/*room_UUID [DELETE]
 
 Team - .../fromTeam/*team_UUID [DELETE]
 
+By himself - .../participants/fromRoomSelf/*id [DELETE]
+
 11. Give admin rights to a player (admin) - .../participants/role [PUT]
 ```
 {
@@ -82,6 +84,18 @@ Team - .../fromTeam/*team_UUID [DELETE]
 }
 ```
 15. Each team should play against every other team - Included in START GAME
+16. Delete user (account) - .../users/*user_id* [DELETE]
+17. Create few teams (admin) - .../teams/fewCreate/*roomID [POST]
+18. Add points to team - .../teams/addPoints/*teamID [PUT]
+19. Delete all teams in room (admin) - .../teams/*room_id [DELETE]
+20. Enter room - .../rooms/enter [POST]
+21. Enter room via invitation code - .../rooms/*inv_code [POST]
+22. Make room private (for room founder) - .../rooms/makePrivate/*roomID [PUT]
+23. Get all open rooms - .../rooms/open [GET]
+24. Get all users without team in room - .../rooms/noTeamUsers/*roomID [GET]
+25. Get all users of each team - .../rooms/allUsersOfEachTeam/*roomID [GET]
+26. Get points of room - .../rooms/points/*roomID [GET]
+27. Get inv code & count of team in room - .../rooms/settings/*roomID [GET]
 
 <h2 align="left">Secondary functions</h2>
 
@@ -90,3 +104,6 @@ Team - .../fromTeam/*team_UUID [DELETE]
 3. Get a list of users in a team - .../teams/users/*team_UUID [GET]
 4. Get words for the game --
 5. Resume the game - .../rooms/resumeGame/*room_UUID [PUT]
+6. Enter team - .../teams/*enter route [PUT]
+7. Start the game - .../rooms/startGame/*roomID [PUT]
+8. Pause the game - .../rooms/pauseGame/*roomID [PUT]
