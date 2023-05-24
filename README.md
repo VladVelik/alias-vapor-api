@@ -2,4 +2,4 @@
 
 Welcome to our 
 
-You can see server requests <a href="[(https://github.com/VladVelik/alias-vapor-api/blob/main/Server/README.md)]" target="_blank">here</a>here 
+You can see server requests <a href="(https://github.com/VladVelik/alias-vapor-api/blob/main/Server/README.md)" target="_blank">here</a>here 
