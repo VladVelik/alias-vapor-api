@@ -5,8 +5,11 @@ Welcome to our project with the implementation of the game alias!
 To start the game you should:
 1. Run a local server located in the **Server** folder
 2. Set up the necessary software for correct client-server interaction
+
 2a. Check that you have a Vapor installed
+
 2b. Start docker with *docker compose up db* command
+
 3. Run the game (**App** folder). To make sure it works, you can run several simulators in xcode.
 4. You are amazing! Now you can register and play!
 
