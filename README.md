@@ -25,7 +25,7 @@ You can see server requests <a href="https://github.com/VladVelik/alias-vapor-ap
 
 ## Authors:
 
-- **Sosin Vladislav** - [VladVelik](https://github.com/VladVelik)
-- **Yakunyushkin Nikita** - [Nikt-Y](https://github.com/Nikt-Y)
-- **Lisunov Nikita** - [FoxFromFuture](https://github.com/FoxFromFuture)
+- [Sosin Vladislav](https://github.com/VladVelik)
+- [Yakunyushkin Nikita](https://github.com/Nikt-Y)
+- [Lisunov Nikita](https://github.com/FoxFromFuture)
 
